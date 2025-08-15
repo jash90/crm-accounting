@@ -4,18 +4,18 @@
 
 @layer base {
   :root {
-    /* Primary Colors (Blue) */
-    --color-primary-50: 239 246 255;
-    --color-primary-100: 219 234 254;
-    --color-primary-200: 191 219 254;
-    --color-primary-300: 147 197 253;
-    --color-primary-400: 96 165 250;
-    --color-primary-500: 59 130 246;
-    --color-primary-600: 37 99 235;
-    --color-primary-700: 29 78 216;
-    --color-primary-800: 30 64 175;
-    --color-primary-900: 30 58 138;
-    --color-primary-950: 23 37 84;
+    /* Primary Colors (Brand Green #0F6D2F) */
+    --color-primary-50: 230 244 235;
+    --color-primary-100: 207 234 216;
+    --color-primary-200: 175 224 193;
+    --color-primary-300: 120 195 149;
+    --color-primary-400: 64 166 106;
+    --color-primary-500: 15 109 47; /* #0F6D2F */
+    --color-primary-600: 12 90 39;
+    --color-primary-700: 9 72 31;
+    --color-primary-800: 7 58 25;
+    --color-primary-900: 5 46 20;
+    --color-primary-950: 3 31 13;
 
     /* Surface Colors (Light Mode) */
     --color-surface-50: 248 250 252;
@@ -53,102 +53,104 @@
   body {
     @apply bg-surface-50 text-surface-900 dark:bg-surface-950 dark:text-surface-100;
   }
-  
+
   /* Smooth scrolling for better UX */
   html {
     scroll-behavior: smooth;
   }
-  
+
   /* Custom scrollbar styles */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
-  
+
   ::-webkit-scrollbar-track {
     @apply bg-surface-100 dark:bg-surface-800;
   }
-  
+
   ::-webkit-scrollbar-thumb {
     @apply bg-surface-300 dark:bg-surface-600 rounded-full;
   }
-  
+
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-surface-400 dark:bg-surface-500;
   }
-  
+
   /* Focus styles for better accessibility */
   .focus-visible {
     @apply outline-2 outline-offset-2 outline-primary-500;
   }
-  
+
   /* Prevent layout shift during transitions */
   .transition-layout {
-    transition: margin-left 300ms ease-out, width 300ms ease-out;
+    transition:
+      margin-left 300ms ease-out,
+      width 300ms ease-out;
   }
-  
+
   /* Improved focus styles */
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-surface-50 dark:focus:ring-offset-surface-950;
   }
-  
+
   /* Smooth animations for better performance */
   .will-change-transform {
     will-change: transform;
   }
-  
+
   /* Enhanced sidebar animations */
   .sidebar-enter {
     transform: translateX(-100%);
   }
-  
+
   .sidebar-enter-active {
     transform: translateX(0);
     transition: transform 300ms ease-out;
   }
-  
+
   .sidebar-exit {
     transform: translateX(0);
   }
-  
+
   .sidebar-exit-active {
     transform: translateX(-100%);
     transition: transform 300ms ease-in;
   }
-  
+
   /* Hamburger menu animations */
   .hamburger-line {
     transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
     transform-origin: center;
   }
-  
+
   /* Touch action for better mobile performance */
   .touch-pan-y {
     touch-action: pan-y;
   }
-  
+
   /* Backdrop blur for modern browsers */
   .backdrop-blur-sm {
     backdrop-filter: blur(4px);
   }
-  
+
   @supports not (backdrop-filter: blur(4px)) {
     .backdrop-blur-sm {
       background-color: rgba(0, 0, 0, 0.6);
     }
   }
-  
+
   /* Improve text rendering */
   * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  
+
   /* Better button styles */
   button {
     @apply touch-manipulation;
   }
-  
+
   /* Reduce motion for accessibility */
   @media (prefers-reduced-motion: reduce) {
     * {
