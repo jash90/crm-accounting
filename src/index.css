@@ -213,12 +213,6 @@
   .dark .text-blue-600 {
     @apply text-primary;
   }
-  .dark .text-blue-800 {
-    @apply text-primary;
-  }
-  .dark .bg-blue-100 {
-    @apply bg-primary/10;
-  }
   .dark .focus\:ring-blue-500:focus {
     @apply focus:ring-ring;
   }

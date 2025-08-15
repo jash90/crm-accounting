@@ -142,7 +142,7 @@ export const DashboardPage: React.FC = () => {
       case 'created':
         return 'text-green-800 bg-green-100';
       case 'updated':
-        return 'text-primary-800 bg-primary-100';
+        return 'text-blue-800 bg-blue-100';
       case 'deleted':
         return 'text-red-800 bg-red-100';
       case 'enabled':
