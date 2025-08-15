@@ -38,10 +38,12 @@ function App() {
   // Show loading screen while initializing auth
   if (!initialized || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-surface-50 dark:bg-surface-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading application...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-surface-600 dark:text-surface-400">
+            Loading application...
+          </p>
         </div>
       </div>
     );
@@ -100,7 +102,11 @@ function App() {
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme="light"
+          theme={
+            document.documentElement.classList.contains('dark')
+              ? 'dark'
+              : 'light'
+          }
         />
       </div>
     </Router>

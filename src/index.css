@@ -4,6 +4,8 @@
 
 @layer base {
   :root {
+    /* Advertise supported color schemes to the browser */
+    color-scheme: light;
     /* Primary Colors (Brand Green #0F6D2F) */
     --color-primary-50: 230 244 235;
     --color-primary-100: 207 234 216;
@@ -32,6 +34,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     /* Surface Colors (Dark Mode) */
     --color-surface-50: 2 6 23;
     --color-surface-100: 15 23 42;
@@ -158,5 +161,63 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+  }
+}
+
+/* Global dark-mode overrides for legacy utility usage */
+@layer base {
+  .dark .bg-white {
+    background-color: rgb(var(--color-surface-900)) !important;
+  }
+  .dark .hover\:bg-gray-50:hover {
+    background-color: rgb(var(--color-surface-800)) !important;
+  }
+  .dark .bg-gray-50 {
+    background-color: rgb(var(--color-surface-900)) !important;
+  }
+  .dark .text-gray-900 {
+    color: rgb(var(--color-surface-100)) !important;
+  }
+  .dark .text-gray-700 {
+    color: rgb(var(--color-surface-200)) !important;
+  }
+  .dark .text-gray-600 {
+    color: rgb(var(--color-surface-400)) !important;
+  }
+  .dark .text-gray-500 {
+    color: rgb(var(--color-surface-500)) !important;
+  }
+  .dark .text-gray-400 {
+    color: rgb(var(--color-surface-600)) !important;
+  }
+  .dark .placeholder-gray-500::placeholder {
+    color: rgb(var(--color-surface-500)) !important;
+  }
+  .dark .border-gray-200 {
+    border-color: rgb(var(--color-surface-700)) !important;
+  }
+  .dark .border-gray-300 {
+    border-color: rgb(var(--color-surface-600)) !important;
+  }
+  .dark .bg-blue-600 {
+    background-color: rgb(var(--color-primary-600)) !important;
+  }
+  .dark .hover\:bg-blue-700:hover {
+    background-color: rgb(var(--color-primary-700)) !important;
+  }
+  .dark .text-blue-600 {
+    color: rgb(var(--color-primary-600)) !important;
+  }
+  .dark .text-blue-800 {
+    color: rgb(var(--color-primary-400)) !important;
+  }
+  .dark .bg-blue-100 {
+    background-color: rgb(var(--color-primary-900)) !important;
+  }
+  .dark .focus\:ring-blue-500:focus {
+    --tw-ring-color: rgb(var(--color-primary-500)) !important;
+  }
+  .dark .focus\:border-blue-500:focus {
+    border-color: rgb(var(--color-primary-500)) !important;
   }
 }
