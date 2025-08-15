@@ -17,7 +17,12 @@ import { AcceptInvitePage } from '@/pages/AcceptInvitePage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { ModulesPage } from '@/pages/ModulesPage';
 import { InvitesPage } from '@/pages/InvitesPage';
-import { ClientsPage, AddClientPage, EditClientPage } from '@/modules/clients';
+import {
+  ClientsPage,
+  AddClientPage,
+  EditClientPage,
+  ClientViewPage,
+} from '@/modules/clients';
 import { AccessDeniedPage } from '@/pages/AccessDeniedPage';
 
 // Styles
@@ -66,6 +71,7 @@ function App() {
 
             <Route path="clients" element={<ClientsPage />} />
             <Route path="clients/add" element={<AddClientPage />} />
+            <Route path="clients/:id" element={<ClientViewPage />} />
             <Route path="clients/:id/edit" element={<EditClientPage />} />
 
             <Route path="modules" element={<ModulesPage />} />

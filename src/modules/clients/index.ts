@@ -22,6 +22,7 @@ if (typeof window !== 'undefined') {
 export { ClientsPage } from './pages/ClientsPage';
 export { AddClientPage } from './pages/AddClientPage';
 export { EditClientPage } from './pages/EditClientPage';
+export { ClientViewPage } from './pages/ClientViewPage';
 export { ClientCard } from './components/ClientCard';
 
 // Hook exports

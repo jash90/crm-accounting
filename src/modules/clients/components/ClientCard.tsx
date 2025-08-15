@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { Client } from '@/types/supabase';
 import { useAuthStore } from '@/stores/auth';
 import { useClientsModuleIntegration } from '@/hooks/useModuleIntegration';
@@ -21,6 +22,7 @@ import {
   ScrollText,
   Files,
   ListTodo,
+  Eye,
 } from 'lucide-react';
 
 interface ClientCardProps {
@@ -35,6 +37,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
   onDelete,
 }) => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   const [showMenu, setShowMenu] = React.useState(false);
   const { features, callModuleMethod } = useClientsModuleIntegration();
 
@@ -116,133 +119,148 @@ export const ClientCard: React.FC<ClientCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="flex-shrink-0">
-            <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <Building2 className="h-6 w-6 text-blue-600" />
-            </div>
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2">
-              <h3 className="text-lg font-medium text-gray-900 truncate">
-                {client.company_name}
-              </h3>
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                #{client.client_number}
-              </span>
-            </div>
-            {client.business_type && (
-              <p className="text-sm text-gray-500 truncate">
-                {client.business_type}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {(canEdit || canDelete) && (
-          <div className="relative">
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <MoreVertical className="h-5 w-5" />
-            </button>
-
-            {showMenu && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
-                <div className="py-1">
-                  {canEdit && onEdit && (
-                    <button
-                      onClick={() => {
-                        onEdit(client);
-                        setShowMenu(false);
-                      }}
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit Client
-                    </button>
-                  )}
-
-                  {/* Module-specific actions */}
-                  {features.canGenerateInvoices && (
-                    <button
-                      onClick={() => {
-                        handleGenerateInvoice();
-                        setShowMenu(false);
-                      }}
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                    >
-                      <Receipt className="h-4 w-4 mr-2" />
-                      Generate Invoice
-                    </button>
-                  )}
-
-                  {features.canManageContracts && (
-                    <button
-                      onClick={() => {
-                        handleManageContracts();
-                        setShowMenu(false);
-                      }}
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                    >
-                      <ScrollText className="h-4 w-4 mr-2" />
-                      Manage Contracts
-                    </button>
-                  )}
-
-                  {features.canAttachDocuments && (
-                    <button
-                      onClick={() => {
-                        handleAttachDocument();
-                        setShowMenu(false);
-                      }}
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                    >
-                      <Files className="h-4 w-4 mr-2" />
-                      Attach Document
-                    </button>
-                  )}
-
-                  {features.canAssignTasks && (
-                    <button
-                      onClick={() => {
-                        window.location.href = `/tasks?clientId=${client.id}`;
-                        setShowMenu(false);
-                      }}
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                    >
-                      <ListTodo className="h-4 w-4 mr-2" />
-                      View Tasks
-                    </button>
-                  )}
-
-                  {(features.canGenerateInvoices ||
-                    features.canManageContracts ||
-                    features.canAttachDocuments ||
-                    features.canAssignTasks) && (
-                    <div className="border-t border-gray-100 my-1"></div>
-                  )}
-
-                  {canDelete && onDelete && (
-                    <button
-                      onClick={() => {
-                        onDelete(client);
-                        setShowMenu(false);
-                      }}
-                      className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete Client
-                    </button>
-                  )}
-                </div>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+      {/* Clickable area for navigation */}
+      <div
+        className="p-6 cursor-pointer"
+        onClick={() => navigate(`/clients/${client.id}`)}
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="flex-shrink-0">
+              <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <Building2 className="h-6 w-6 text-blue-600" />
               </div>
-            )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-2">
+                <h3 className="text-lg font-medium text-gray-900 truncate hover:text-blue-600 transition-colors">
+                  {client.company_name}
+                </h3>
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  #{client.client_number}
+                </span>
+              </div>
+              {client.business_type && (
+                <p className="text-sm text-gray-500 truncate">
+                  {client.business_type}
+                </p>
+              )}
+            </div>
           </div>
-        )}
+
+          {/* Action menu - prevent click propagation */}
+          {(canEdit || canDelete) && (
+            <div className="relative" onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <MoreVertical className="h-5 w-5" />
+              </button>
+
+              {showMenu && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                  <div className="py-1">
+                    <button
+                      onClick={() => navigate(`/clients/${client.id}`)}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Details
+                    </button>
+
+                    {canEdit && onEdit && (
+                      <button
+                        onClick={() => {
+                          onEdit(client);
+                          setShowMenu(false);
+                        }}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Client
+                      </button>
+                    )}
+
+                    {/* Module-specific actions */}
+                    {features.canGenerateInvoices && (
+                      <button
+                        onClick={() => {
+                          handleGenerateInvoice();
+                          setShowMenu(false);
+                        }}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                      >
+                        <Receipt className="h-4 w-4 mr-2" />
+                        Generate Invoice
+                      </button>
+                    )}
+
+                    {features.canManageContracts && (
+                      <button
+                        onClick={() => {
+                          handleManageContracts();
+                          setShowMenu(false);
+                        }}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                      >
+                        <ScrollText className="h-4 w-4 mr-2" />
+                        Manage Contracts
+                      </button>
+                    )}
+
+                    {features.canAttachDocuments && (
+                      <button
+                        onClick={() => {
+                          handleAttachDocument();
+                          setShowMenu(false);
+                        }}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                      >
+                        <Files className="h-4 w-4 mr-2" />
+                        Attach Document
+                      </button>
+                    )}
+
+                    {features.canAssignTasks && (
+                      <button
+                        onClick={() => {
+                          window.location.href = `/tasks?clientId=${client.id}`;
+                          setShowMenu(false);
+                        }}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                      >
+                        <ListTodo className="h-4 w-4 mr-2" />
+                        View Tasks
+                      </button>
+                    )}
+
+                    {(features.canGenerateInvoices ||
+                      features.canManageContracts ||
+                      features.canAttachDocuments ||
+                      features.canAssignTasks) && (
+                      <div className="border-t border-gray-100 my-1"></div>
+                    )}
+
+                    {canDelete && onDelete && (
+                      <button
+                        onClick={() => {
+                          onDelete(client);
+                          setShowMenu(false);
+                        }}
+                        className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Client
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Contact Information */}
