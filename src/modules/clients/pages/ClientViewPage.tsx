@@ -644,9 +644,9 @@ export const ClientViewPage: React.FC = () => {
               </div>
 
               {/* ZUS Information */}
-              {(client.zus_details ||
-                client.zus_startup_relief ||
-                client.zus_startup_relief_months) && (
+              {client.zus_details ||
+              client.zus_startup_relief ||
+              client.zus_startup_relief_months ? (
                 <div className="bg-white rounded-lg shadow p-6">
                   <h2 className="text-lg font-medium text-gray-900 mb-4">
                     ZUS Information
@@ -663,25 +663,9 @@ export const ClientViewPage: React.FC = () => {
                         </p>
                       </div>
                     )}
-
-                    {client.zus_startup_relief && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          ZUS Startup Relief
-                        </label>
-                        <div className="mt-1 flex items-center">
-                          <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                          <span className="text-sm text-gray-900">
-                            Active
-                            {client.zus_startup_relief_months &&
-                              ` (${client.zus_startup_relief_months} months)`}
-                          </span>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
-              )}
+              ) : null}
 
               {/* Sensitive Information */}
               {canViewSensitive &&
