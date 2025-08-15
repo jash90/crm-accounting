@@ -1,10 +1,12 @@
 import React from 'react';
 import type { Client } from '@/types/supabase';
 import { useAuthStore } from '@/stores/auth';
-import { 
-  Building2, 
-  Mail, 
-  Phone, 
+import { useClientsModuleIntegration } from '@/hooks/useModuleIntegration';
+import { toast } from 'react-toastify';
+import {
+  Building2,
+  Mail,
+  Phone,
   Calendar,
   FileText,
   DollarSign,
@@ -14,7 +16,11 @@ import {
   Trash2,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  Receipt,
+  ScrollText,
+  Files,
+  ListTodo,
 } from 'lucide-react';
 
 interface ClientCardProps {
@@ -23,16 +29,54 @@ interface ClientCardProps {
   onDelete?: (client: Client) => void;
 }
 
-export const ClientCard: React.FC<ClientCardProps> = ({ 
-  client, 
-  onEdit, 
-  onDelete 
+export const ClientCard: React.FC<ClientCardProps> = ({
+  client,
+  onEdit,
+  onDelete,
 }) => {
   const { user } = useAuthStore();
   const [showMenu, setShowMenu] = React.useState(false);
+  const { features, callModuleMethod } = useClientsModuleIntegration();
 
-  const canEdit = user?.role === 'OWNER' || user?.role === 'SUPERADMIN' || client.created_by === user?.id;
+  const canEdit =
+    user?.role === 'OWNER' ||
+    user?.role === 'SUPERADMIN' ||
+    client.created_by === user?.id;
   const canDelete = canEdit;
+
+  // Handle module-specific actions
+  const handleGenerateInvoice = async () => {
+    if (features.canGenerateInvoices) {
+      const result = await callModuleMethod(
+        'Invoices',
+        'createForClient',
+        client.id
+      );
+      if (result) {
+        toast.success('Invoice generation started');
+      }
+    }
+  };
+
+  const handleManageContracts = async () => {
+    if (features.canManageContracts) {
+      // Navigate to contracts for this client
+      window.location.href = `/contracts?clientId=${client.id}`;
+    }
+  };
+
+  const handleAttachDocument = async () => {
+    if (features.canAttachDocuments) {
+      const result = await callModuleMethod(
+        'Documents',
+        'attachToClient',
+        client.id
+      );
+      if (result) {
+        toast.success('Document attached successfully');
+      }
+    }
+  };
 
   const getContractStatusColor = (status: string) => {
     switch (status) {
@@ -90,22 +134,24 @@ export const ClientCard: React.FC<ClientCardProps> = ({
               </span>
             </div>
             {client.business_type && (
-              <p className="text-sm text-gray-500 truncate">{client.business_type}</p>
+              <p className="text-sm text-gray-500 truncate">
+                {client.business_type}
+              </p>
             )}
           </div>
         </div>
-        
+
         {(canEdit || canDelete) && (
           <div className="relative">
-            <button 
+            <button
               onClick={() => setShowMenu(!showMenu)}
               className="text-gray-400 hover:text-gray-600"
             >
               <MoreVertical className="h-5 w-5" />
             </button>
-            
+
             {showMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
                 <div className="py-1">
                   {canEdit && onEdit && (
                     <button
@@ -119,6 +165,67 @@ export const ClientCard: React.FC<ClientCardProps> = ({
                       Edit Client
                     </button>
                   )}
+
+                  {/* Module-specific actions */}
+                  {features.canGenerateInvoices && (
+                    <button
+                      onClick={() => {
+                        handleGenerateInvoice();
+                        setShowMenu(false);
+                      }}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                    >
+                      <Receipt className="h-4 w-4 mr-2" />
+                      Generate Invoice
+                    </button>
+                  )}
+
+                  {features.canManageContracts && (
+                    <button
+                      onClick={() => {
+                        handleManageContracts();
+                        setShowMenu(false);
+                      }}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                    >
+                      <ScrollText className="h-4 w-4 mr-2" />
+                      Manage Contracts
+                    </button>
+                  )}
+
+                  {features.canAttachDocuments && (
+                    <button
+                      onClick={() => {
+                        handleAttachDocument();
+                        setShowMenu(false);
+                      }}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                    >
+                      <Files className="h-4 w-4 mr-2" />
+                      Attach Document
+                    </button>
+                  )}
+
+                  {features.canAssignTasks && (
+                    <button
+                      onClick={() => {
+                        window.location.href = `/tasks?clientId=${client.id}`;
+                        setShowMenu(false);
+                      }}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                    >
+                      <ListTodo className="h-4 w-4 mr-2" />
+                      View Tasks
+                    </button>
+                  )}
+
+                  {(features.canGenerateInvoices ||
+                    features.canManageContracts ||
+                    features.canAttachDocuments ||
+                    features.canAssignTasks) && (
+                    <div className="border-t border-gray-100 my-1"></div>
+                  )}
+
                   {canDelete && onDelete && (
                     <button
                       onClick={() => {
@@ -148,7 +255,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
             </a>
           </div>
         )}
-        
+
         {client.phone && (
           <div className="flex items-center text-sm text-gray-600">
             <Phone className="h-4 w-4 mr-2 text-gray-400" />
@@ -157,21 +264,21 @@ export const ClientCard: React.FC<ClientCardProps> = ({
             </a>
           </div>
         )}
-        
+
         {client.start_date && (
           <div className="flex items-center text-sm text-gray-600">
             <Calendar className="h-4 w-4 mr-2 text-gray-400" />
             <span>Started: {formatDate(client.start_date)}</span>
           </div>
         )}
-        
+
         {client.tax_form && (
           <div className="flex items-center text-sm text-gray-600">
             <DollarSign className="h-4 w-4 mr-2 text-gray-400" />
             <span>{client.tax_form}</span>
           </div>
         )}
-        
+
         {client.has_employees && (
           <div className="flex items-center text-sm text-gray-600">
             <Users className="h-4 w-4 mr-2 text-gray-400" />
@@ -209,7 +316,9 @@ export const ClientCard: React.FC<ClientCardProps> = ({
       {/* Contract Status and AML */}
       <div className="mt-4 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getContractStatusColor(client.contract_status)}`}>
+          <span
+            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getContractStatusColor(client.contract_status)}`}
+          >
             {getContractStatusIcon(client.contract_status)}
             <span className="ml-1">{client.contract_status}</span>
           </span>
@@ -232,10 +341,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
 
       {/* Click outside to close menu */}
       {showMenu && (
-        <div 
-          className="fixed inset-0 z-0" 
-          onClick={() => setShowMenu(false)}
-        />
+        <div className="fixed inset-0 z-0" onClick={() => setShowMenu(false)} />
       )}
     </div>
   );

@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/auth';
 import { logActivity } from '@/lib/activityLogger';
 import type { Client } from '@/types/supabase';
+import { clientEvents } from '@/lib/eventBus';
+import { performanceThresholds } from '../config';
+import { toast } from 'react-toastify';
 
 export const useClients = () => {
   const { user } = useAuthStore();
@@ -10,12 +13,14 @@ export const useClients = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchClients = async () => {
+  const fetchClients = useCallback(async () => {
     if (!user || !user.company_id) {
       setClients([]);
       setLoading(false);
       return;
     }
+
+    const startTime = performance.now();
 
     try {
       setLoading(true);
@@ -30,23 +35,35 @@ export const useClients = () => {
       if (fetchError) throw fetchError;
 
       setClients(data || []);
-    } catch (err: any) {
-      setError(err.message);
+
+      // Performance monitoring
+      const duration = performance.now() - startTime;
+      if (duration > performanceThresholds.operations.fetchList) {
+        console.warn(
+          `[Clients] Slow fetch operation: ${duration.toFixed(2)}ms for ${data?.length || 0} clients`
+        );
+        if (process.env.NODE_ENV === 'development') {
+          toast.warning(`Slow client fetch: ${duration.toFixed(0)}ms`);
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
       setClients([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchClients();
-  }, [user]);
+  }, [fetchClients]);
 
   const getNextClientNumber = async (): Promise<number> => {
     if (!user?.company_id) throw new Error('No company ID');
 
-    const { data, error } = await supabase
-      .rpc('get_next_client_number', { company_uuid: user.company_id });
+    const { data, error } = await supabase.rpc('get_next_client_number', {
+      company_uuid: user.company_id,
+    });
 
     if (error) throw error;
     return data;
@@ -93,35 +110,47 @@ export const useClients = () => {
 
       const { data, error } = await supabase
         .from('clients')
-        .insert([{
-          ...clientData,
-          client_number: clientNumber,
-          company_id: user.company_id,
-          created_by: user.id,
-        }])
+        .insert([
+          {
+            ...clientData,
+            client_number: clientNumber,
+            company_id: user.company_id,
+            created_by: user.id,
+          },
+        ])
         .select()
         .single();
 
       if (error) throw error;
 
       await fetchClients(); // Refresh the list
-      
+
       // Log activity
       await logActivity({
         action_type: 'created',
         resource_type: 'client',
         resource_name: clientData.company_name,
-        details: { 
+        details: {
           client_number: clientNumber,
           business_type: clientData.business_type,
           tax_form: clientData.tax_form,
-          vat_status: clientData.vat_status
-        }
+          vat_status: clientData.vat_status,
+        },
       });
-      
+
+      // Emit event for other modules
+      clientEvents.created({
+        id: data.id,
+        name: clientData.company_name,
+        email: clientData.email,
+        client_number: clientNumber,
+        tax_form: clientData.tax_form,
+        vat_status: clientData.vat_status,
+      });
+
       return data;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
       throw err;
     }
   };
@@ -139,16 +168,23 @@ export const useClients = () => {
       if (error) throw error;
 
       await fetchClients(); // Refresh the list
-      
+
       // Log activity
       await logActivity({
         action_type: 'updated',
         resource_type: 'client',
         resource_name: updates.company_name || 'Client',
-        details: updates
+        details: updates,
       });
-    } catch (err: any) {
-      setError(err.message);
+
+      // Emit event for other modules
+      clientEvents.updated({
+        id: clientId,
+        name: updates.company_name || 'Client',
+        ...updates,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
       throw err;
     }
   };
@@ -161,7 +197,7 @@ export const useClients = () => {
         .select('company_name, client_number')
         .eq('id', clientId)
         .single();
-      
+
       const { error } = await supabase
         .from('clients')
         .delete()
@@ -170,16 +206,22 @@ export const useClients = () => {
       if (error) throw error;
 
       await fetchClients(); // Refresh the list
-      
+
       // Log activity
       await logActivity({
         action_type: 'deleted',
         resource_type: 'client',
         resource_name: clientToDelete?.company_name || 'Client',
-        details: { client_number: clientToDelete?.client_number }
+        details: { client_number: clientToDelete?.client_number },
       });
-    } catch (err: any) {
-      setError(err.message);
+
+      // Emit event for other modules
+      clientEvents.deleted({
+        id: clientId,
+        name: clientToDelete?.company_name || 'Client',
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
       throw err;
     }
   };
@@ -192,13 +234,15 @@ export const useClients = () => {
         .from('clients')
         .select('*')
         .eq('company_id', user.company_id)
-        .or(`company_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,business_type.ilike.%${searchTerm}%`)
+        .or(
+          `company_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,business_type.ilike.%${searchTerm}%`
+        )
         .order('client_number', { ascending: true });
 
       if (error) throw error;
       return data || [];
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
       return [];
     }
   };
@@ -216,8 +260,8 @@ export const useClients = () => {
 
       if (error) throw error;
       return data || [];
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
       return [];
     }
   };
@@ -235,8 +279,8 @@ export const useClients = () => {
 
       if (error) throw error;
       return data || [];
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
       return [];
     }
   };

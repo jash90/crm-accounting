@@ -18,12 +18,14 @@ export const ClientsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   // Check if user has access to Clients module (assuming it exists)
-  const clientsModule = modules.find(module => 
-    module.name === 'Clients' && 
-    (module as any).company_modules?.[0]?.is_enabled
+  const clientsModule = modules.find(
+    (module) =>
+      module.name === 'Clients' &&
+      (module as any).company_modules?.[0]?.is_enabled
   );
-  
-  const hasClientsAccess = user?.role === 'SUPERADMIN' || Boolean(clientsModule);
+
+  const hasClientsAccess =
+    user?.role === 'SUPERADMIN' || Boolean(clientsModule);
 
   // Show loading while checking module access
   if (modulesLoading) {
@@ -40,10 +42,7 @@ export const ClientsPage: React.FC = () => {
   // Show access denied if user doesn't have access to clients module
   if (!hasClientsAccess) {
     return (
-      <AccessDenied 
-        moduleName="Clients" 
-        userRole={user?.role || 'EMPLOYEE'} 
-      />
+      <AccessDenied moduleName="Clients" userRole={user?.role || 'EMPLOYEE'} />
     );
   }
 
@@ -52,7 +51,11 @@ export const ClientsPage: React.FC = () => {
   };
 
   const handleDeleteClient = async (client: Client) => {
-    if (!window.confirm(`Are you sure you want to delete "${client.company_name}"? This action cannot be undone.`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete "${client.company_name}"? This action cannot be undone.`
+      )
+    ) {
       return;
     }
 
@@ -66,24 +69,28 @@ export const ClientsPage: React.FC = () => {
   };
 
   // Filter clients based on search term and status
-  const filteredClients = clients.filter(client => {
-    const matchesSearch = !searchTerm || 
+  const filteredClients = clients.filter((client) => {
+    const matchesSearch =
+      !searchTerm ||
       client.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.business_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.tax_form?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === 'all' || client.contract_status === statusFilter;
+    const matchesStatus =
+      statusFilter === 'all' || client.contract_status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
 
   const getStatusOptions = () => {
-    const statuses = [...new Set(clients.map(c => c.contract_status))].filter(Boolean);
+    const statuses = [...new Set(clients.map((c) => c.contract_status))].filter(
+      Boolean
+    );
     return [
       { value: 'all', label: 'All Statuses' },
-      ...statuses.map(status => ({ value: status, label: status }))
+      ...statuses.map((status) => ({ value: status, label: status })),
     ];
   };
 
@@ -96,8 +103,8 @@ export const ClientsPage: React.FC = () => {
             Manage your accounting and bookkeeping clients
           </p>
         </div>
-        
-        <button 
+
+        <button
           onClick={() => navigate('/clients/add')}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
@@ -185,8 +192,12 @@ export const ClientsPage: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Clients</dt>
-                  <dd className="text-lg font-medium text-gray-900">{clients.length}</dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Total Clients
+                  </dt>
+                  <dd className="text-lg font-medium text-gray-900">
+                    {clients.length}
+                  </dd>
                 </dl>
               </div>
             </div>
@@ -203,9 +214,17 @@ export const ClientsPage: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Signed Contracts</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Signed Contracts
+                  </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {clients.filter(c => c.contract_status === 'Signed' || c.contract_status === 'Podpisana').length}
+                    {
+                      clients.filter(
+                        (c) =>
+                          c.contract_status === 'Signed' ||
+                          c.contract_status === 'Podpisana'
+                      ).length
+                    }
                   </dd>
                 </dl>
               </div>
@@ -223,9 +242,17 @@ export const ClientsPage: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Pending</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Pending
+                  </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {clients.filter(c => c.contract_status === 'Pending' || c.contract_status === 'W trakcie').length}
+                    {
+                      clients.filter(
+                        (c) =>
+                          c.contract_status === 'Pending' ||
+                          c.contract_status === 'W trakcie'
+                      ).length
+                    }
                   </dd>
                 </dl>
               </div>
@@ -243,9 +270,11 @@ export const ClientsPage: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Using e-SZOK</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Using e-SZOK
+                  </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {clients.filter(c => c.e_szok_system).length}
+                    {clients.filter((c) => c.e_szok_system).length}
                   </dd>
                 </dl>
               </div>
@@ -261,28 +290,70 @@ export const ClientsPage: React.FC = () => {
           <p className="mt-2 text-gray-600">Loading clients...</p>
         </div>
       ) : filteredClients.length === 0 ? (
-        <div className="text-center py-12">
-          <Building2 className="h-12 w-12 text-gray-400 mx-auto" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">
-            {clients.length === 0 ? 'No clients found' : 'No matching clients'}
-          </h3>
-          <p className="mt-1 text-sm text-gray-500">
-            {clients.length === 0 
-              ? 'Get started by adding your first client.'
-              : 'Try adjusting your search or filters.'
-            }
-          </p>
-          {clients.length === 0 && (
-            <div className="mt-6">
-              <button
-                onClick={() => navigate('/clients/add')}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Your First Client
-              </button>
-            </div>
-          )}
+        <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-8">
+            <Building2 className="h-16 w-16 text-gray-400 mx-auto" />
+            <h3 className="mt-4 text-lg font-medium text-gray-900">
+              {clients.length === 0
+                ? 'Welcome to Client Management'
+                : 'No matching clients found'}
+            </h3>
+            <p className="mt-2 text-sm text-gray-500 max-w-md mx-auto">
+              {clients.length === 0
+                ? 'Start managing your accounting clients efficiently. Add your first client to track contracts, tax forms, and business details.'
+                : searchTerm
+                  ? `No clients match "${searchTerm}". Try different search terms or check the spelling.`
+                  : statusFilter !== 'all'
+                    ? `No clients with status "${statusFilter}". Try a different status filter.`
+                    : 'Try adjusting your search or filters to find clients.'}
+            </p>
+            {clients.length === 0 ? (
+              <div className="mt-8 space-y-4">
+                <button
+                  onClick={() => navigate('/clients/add')}
+                  className="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Add Your First Client
+                </button>
+                <div className="text-sm text-gray-500">
+                  <p>Quick tips to get started:</p>
+                  <ul className="mt-2 space-y-1 text-left max-w-sm mx-auto">
+                    <li>• Add basic company information</li>
+                    <li>• Set up tax and VAT configurations</li>
+                    <li>• Track contract status</li>
+                    <li>• Manage multiple contacts per client</li>
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Clear Search
+                  </button>
+                )}
+                {statusFilter !== 'all' && (
+                  <button
+                    onClick={() => setStatusFilter('all')}
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Clear Filters
+                  </button>
+                )}
+                <button
+                  onClick={() => navigate('/clients/add')}
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add New Client
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
