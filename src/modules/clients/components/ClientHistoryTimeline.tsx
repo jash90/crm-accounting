@@ -98,7 +98,7 @@ export const ClientHistoryTimeline: React.FC<ClientHistoryTimelineProps> = ({
       case 'created':
         return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'updated':
-        return <Edit className="h-4 w-4 text-blue-600" />;
+        return <Edit className="h-4 w-4 text-primary-600" />;
       case 'deleted':
         return <Trash2 className="h-4 w-4 text-red-600" />;
       case 'viewed':

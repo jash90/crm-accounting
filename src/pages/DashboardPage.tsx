@@ -3,7 +3,14 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { useActivityLogs } from '@/hooks/useActivityLogs';
 import { supabase } from '@/lib/supabase';
-import { Building2, Users, Package, TrendingUp, Activity, User } from 'lucide-react';
+import {
+  Building2,
+  Users,
+  Package,
+  TrendingUp,
+  Activity,
+  User,
+} from 'lucide-react';
 
 interface DashboardStats {
   companies: number;
@@ -26,7 +33,7 @@ export const DashboardPage: React.FC = () => {
   useEffect(() => {
     const fetchDashboardStats = async () => {
       if (!user) return;
-      
+
       setLoading(true);
       try {
         let companiesCount = 0;
@@ -59,7 +66,6 @@ export const DashboardPage: React.FC = () => {
             .select('*', { count: 'exact', head: true })
             .not('owner_id', 'is', null);
           activeCount = active || 0;
-
         } else {
           // For OWNER/EMPLOYEE - show company stats
           companiesCount = 1; // Always 1 for their company
@@ -104,7 +110,7 @@ export const DashboardPage: React.FC = () => {
       case 'created':
         return <Package className="h-4 w-4 text-green-600" />;
       case 'updated':
-        return <Package className="h-4 w-4 text-blue-600" />;
+        return <Package className="h-4 w-4 text-primary-600" />;
       case 'deleted':
         return <Package className="h-4 w-4 text-red-600" />;
       case 'enabled':
@@ -119,7 +125,7 @@ export const DashboardPage: React.FC = () => {
   const getResourceIcon = (resourceType: string) => {
     switch (resourceType) {
       case 'module':
-        return <Package className="h-4 w-4 text-blue-600" />;
+        return <Package className="h-4 w-4 text-primary-600" />;
       case 'contact':
         return <User className="h-4 w-4 text-green-600" />;
       case 'client':
@@ -136,7 +142,7 @@ export const DashboardPage: React.FC = () => {
       case 'created':
         return 'text-green-800 bg-green-100';
       case 'updated':
-        return 'text-blue-800 bg-blue-100';
+        return 'text-primary-800 bg-primary-100';
       case 'deleted':
         return 'text-red-800 bg-red-100';
       case 'enabled':
@@ -151,8 +157,10 @@ export const DashboardPage: React.FC = () => {
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
+    const diffInMinutes = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60)
+    );
+
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
@@ -166,7 +174,8 @@ export const DashboardPage: React.FC = () => {
           Welcome back, {user?.email}
         </h1>
         <p className="mt-2 text-gray-600">
-          {user?.role === 'SUPERADMIN' && 'Manage all companies and global modules'}
+          {user?.role === 'SUPERADMIN' &&
+            'Manage all companies and global modules'}
           {user?.role === 'OWNER' && 'Manage your company modules and team'}
           {user?.role === 'EMPLOYEE' && 'Access your assigned modules'}
         </p>
@@ -174,7 +183,6 @@ export const DashboardPage: React.FC = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="p-5">
             {loading ? (
@@ -189,7 +197,9 @@ export const DashboardPage: React.FC = () => {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      {user?.role === 'SUPERADMIN' ? 'Total Users' : 'Team Members'}
+                      {user?.role === 'SUPERADMIN'
+                        ? 'Total Users'
+                        : 'Team Members'}
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
                       {stats.users}
@@ -215,7 +225,9 @@ export const DashboardPage: React.FC = () => {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      {user?.role === 'SUPERADMIN' ? 'Total Modules' : 'Enabled Modules'}
+                      {user?.role === 'SUPERADMIN'
+                        ? 'Total Modules'
+                        : 'Enabled Modules'}
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
                       {stats.modules}
@@ -241,7 +253,9 @@ export const DashboardPage: React.FC = () => {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      {user?.role === 'SUPERADMIN' ? 'Active Companies' : 'Active Modules'}
+                      {user?.role === 'SUPERADMIN'
+                        ? 'Active Companies'
+                        : 'Active Modules'}
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
                       {stats.active}
@@ -259,7 +273,9 @@ export const DashboardPage: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center space-x-2">
             <Activity className="h-5 w-5 text-gray-400" />
-            <h2 className="text-lg font-medium text-gray-900">Recent Activity</h2>
+            <h2 className="text-lg font-medium text-gray-900">
+              Recent Activity
+            </h2>
           </div>
         </div>
         <div className="p-6">
@@ -276,7 +292,10 @@ export const DashboardPage: React.FC = () => {
           ) : (
             <div className="space-y-4">
               {activityLogs.map((log) => (
-                <div key={log.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <div
+                  key={log.id}
+                  className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                >
                   <div className="flex-shrink-0 mt-1">
                     {getResourceIcon(log.resource_type)}
                   </div>
@@ -285,7 +304,9 @@ export const DashboardPage: React.FC = () => {
                       <span className="text-sm font-medium text-gray-900">
                         {log.resource_name}
                       </span>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getActionColor(log.action_type)}`}>
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getActionColor(log.action_type)}`}
+                      >
                         {log.action_type}
                       </span>
                       <span className="text-xs text-gray-500 capitalize">
