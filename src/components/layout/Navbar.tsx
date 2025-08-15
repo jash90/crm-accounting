@@ -2,22 +2,16 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth';
 import { SimpleThemeToggle } from '@/components/ui/ThemeToggle';
-import { 
-  Building2, 
-  LogOut,
-  User,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
+import { LogOut, User, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface NavbarProps {
   sidebarCollapsed?: boolean;
   onToggleCollapse?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ 
-  sidebarCollapsed = false, 
-  onToggleCollapse
+export const Navbar: React.FC<NavbarProps> = ({
+  sidebarCollapsed = false,
+  onToggleCollapse,
 }) => {
   const { user, signOut } = useAuthStore();
   const navigate = useNavigate();
@@ -25,7 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const handleSignOut = async () => {
     if (isSigningOut) return;
-    
+
     try {
       setIsSigningOut(true);
       await signOut();
@@ -48,7 +42,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 onClick={onToggleCollapse}
                 className="hidden lg:block p-2 rounded-md text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                aria-label={
+                  sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
+                }
                 title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               >
                 {sidebarCollapsed ? (
@@ -58,10 +54,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
               </button>
             )}
-            
+
             {/* Logo */}
             <div className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-primary-600" />
+              <img
+                src="/favicon-32x32.png"
+                alt="App logo"
+                className="h-8 w-8 rounded"
+              />
               <span className="hidden sm:block text-xl font-bold text-surface-900 dark:text-surface-100">
                 SaaS Platform
               </span>
@@ -72,7 +72,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {user && (
             <div className="flex items-center space-x-2 sm:space-x-4">
               <SimpleThemeToggle />
-              
+
               {/* User info - hidden on small screens */}
               <div className="hidden md:flex items-center space-x-2 text-sm text-surface-600 dark:text-surface-400">
                 <User className="h-4 w-4" />
@@ -81,7 +81,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {user.role.toLowerCase()}
                 </span>
               </div>
-              
+
               {/* Sign out button */}
               <button
                 onClick={handleSignOut}
@@ -90,7 +90,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 aria-label="Sign out"
                 title="Sign out"
               >
-                <LogOut className={`h-4 w-4 ${isSigningOut ? 'animate-spin' : ''}`} />
+                <LogOut
+                  className={`h-4 w-4 ${isSigningOut ? 'animate-spin' : ''}`}
+                />
                 <span className="hidden md:inline">
                   {isSigningOut ? 'Signing out...' : 'Sign Out'}
                 </span>
