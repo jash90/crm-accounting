@@ -10,13 +10,18 @@ interface ModuleDialogProps {
   onClose: () => void;
 }
 
-export const ModuleDialog: React.FC<ModuleDialogProps> = ({ module, onClose }) => {
+export const ModuleDialog: React.FC<ModuleDialogProps> = ({
+  module,
+  onClose,
+}) => {
   const { user } = useAuthStore();
   const { createModule, updateModule } = useModules();
   const [name, setName] = useState(module?.name || '');
   const [description, setDescription] = useState(module?.description || '');
   const [href, setHref] = useState(module?.href || '');
-  const [isPublic, setIsPublic] = useState(module?.is_public_within_company !== false);
+  const [isPublic, setIsPublic] = useState(
+    module?.is_public_within_company !== false
+  );
   const [loading, setLoading] = useState(false);
 
   const isEditing = Boolean(module);
@@ -26,14 +31,18 @@ export const ModuleDialog: React.FC<ModuleDialogProps> = ({ module, onClose }) =
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-          <div 
+          <div
             className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
             onClick={onClose}
           />
           <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
             <div className="text-center">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Access Denied</h3>
-              <p className="text-sm text-gray-500 mb-6">Only Super Administrators can create or edit modules.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Access Denied
+              </h3>
+              <p className="text-sm text-gray-500 mb-6">
+                Only Super Administrators can create or edit modules.
+              </p>
               <button
                 onClick={onClose}
                 className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
@@ -81,7 +90,7 @@ export const ModuleDialog: React.FC<ModuleDialogProps> = ({ module, onClose }) =
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         {/* Background overlay */}
-        <div 
+        <div
           className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
           onClick={onClose}
         />
@@ -108,16 +117,18 @@ export const ModuleDialog: React.FC<ModuleDialogProps> = ({ module, onClose }) =
               </h3>
               <div className="mt-2">
                 <p className="text-sm text-gray-500">
-                  {isEditing 
+                  {isEditing
                     ? 'Update the global module details. Companies can enable/disable this module separately.'
-                    : 'Create a new global module that companies can enable for their users.'
-                  }
+                    : 'Create a new global module that companies can enable for their users.'}
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 <div>
-                  <label htmlFor="module-name" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="module-name"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Module Name
                   </label>
                   <input
@@ -132,7 +143,10 @@ export const ModuleDialog: React.FC<ModuleDialogProps> = ({ module, onClose }) =
                 </div>
 
                 <div>
-                  <label htmlFor="module-description" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="module-description"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Description
                   </label>
                   <textarea
@@ -146,7 +160,10 @@ export const ModuleDialog: React.FC<ModuleDialogProps> = ({ module, onClose }) =
                 </div>
 
                 <div>
-                  <label htmlFor="module-href" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="module-href"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Module Route
                   </label>
                   <input
@@ -155,10 +172,11 @@ export const ModuleDialog: React.FC<ModuleDialogProps> = ({ module, onClose }) =
                     value={href}
                     onChange={(e) => setHref(e.target.value)}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="/contacts"
+                    placeholder="/dashboard"
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    Optional route path within the application (e.g., /contacts, /reports)
+                    Optional route path within the application (e.g., /clients,
+                    /reports)
                   </p>
                 </div>
 
@@ -167,7 +185,7 @@ export const ModuleDialog: React.FC<ModuleDialogProps> = ({ module, onClose }) =
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Module Visibility
                     </label>
-                    
+
                     <div className="flex items-start">
                       <div className="flex items-center h-5">
                         <input
@@ -179,11 +197,15 @@ export const ModuleDialog: React.FC<ModuleDialogProps> = ({ module, onClose }) =
                         />
                       </div>
                       <div className="ml-3 text-sm">
-                        <label htmlFor="module-public" className="font-medium text-gray-700">
+                        <label
+                          htmlFor="module-public"
+                          className="font-medium text-gray-700"
+                        >
                           Visible to company owners
                         </label>
                         <p className="text-gray-500">
-                          Company owners can see this module in their modules list and enable/disable it for their company
+                          Company owners can see this module in their modules
+                          list and enable/disable it for their company
                         </p>
                       </div>
                     </div>
@@ -196,7 +218,11 @@ export const ModuleDialog: React.FC<ModuleDialogProps> = ({ module, onClose }) =
                     disabled={loading}
                     className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? 'Saving...' : isEditing ? 'Update Module' : 'Create Module'}
+                    {loading
+                      ? 'Saving...'
+                      : isEditing
+                        ? 'Update Module'
+                        : 'Create Module'}
                   </button>
                   <button
                     type="button"

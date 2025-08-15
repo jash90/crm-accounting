@@ -1,5 +1,10 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { useAuthStore } from '@/stores/auth';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -12,16 +17,7 @@ import { AcceptInvitePage } from '@/pages/AcceptInvitePage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { ModulesPage } from '@/pages/ModulesPage';
 import { InvitesPage } from '@/pages/InvitesPage';
-import { ContactsPage } from '@/modules/contacts';
 import { ClientsPage, AddClientPage, EditClientPage } from '@/modules/clients';
-import { 
-  OfferWizard, 
-  OfferView, 
-  OfferLanding, 
-  OffersTable,
-  Checklists,
-  PriceListManager
-} from '@/modules/offers';
 import { AccessDeniedPage } from '@/pages/AccessDeniedPage';
 
 // Styles
@@ -55,7 +51,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/invite" element={<AcceptInvitePage />} />
           <Route path="/access-denied" element={<AccessDeniedPage />} />
-          
+
           {/* Protected routes */}
           <Route
             path="/"
@@ -67,40 +63,21 @@ function App() {
           >
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
-            <Route 
-              path="contacts" 
-              element={<ContactsPage />}
-            />
-            <Route 
-              path="clients" 
-              element={<ClientsPage />}
-            />
-            <Route 
-              path="clients/add" 
-              element={<AddClientPage />}
-            />
-            <Route 
-              path="clients/:id/edit" 
-              element={<EditClientPage />}
-            />
-            <Route path="offers" element={<OffersTable />} />
-            <Route path="offers/new" element={<OfferWizard />} />
-            <Route path="offers/:id" element={<OfferView />} />
-            <Route path="price-list" element={<PriceListManager />} />
-            <Route path="clients/:id/checklists" element={<Checklists />} />
+
+            <Route path="clients" element={<ClientsPage />} />
+            <Route path="clients/add" element={<AddClientPage />} />
+            <Route path="clients/:id/edit" element={<EditClientPage />} />
+
             <Route path="modules" element={<ModulesPage />} />
-            <Route 
-              path="invites" 
+            <Route
+              path="invites"
               element={
                 <ProtectedRoute requiredRole="OWNER">
                   <InvitesPage />
                 </ProtectedRoute>
-              } 
+              }
             />
           </Route>
-
-          {/* Public offer acceptance route */}
-          <Route path="/offer/:token" element={<OfferLanding />} />
 
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

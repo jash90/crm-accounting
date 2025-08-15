@@ -121,7 +121,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     modules.forEach(module => {
       if (module.href && (module as any).company_modules?.[0]?.is_enabled) {
         let icon = Package;
-        if (module.name === 'Contacts') icon = UserCheck;
         if (module.name === 'Clients') icon = Building2;
         
         links.push({ 
@@ -132,14 +131,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         });
       }
     });
-
-    // Add offers link for all authenticated users
-    links.push({ to: '/offers', label: 'Offers', icon: FileText });
-
-    // Add price list link for owners and superadmins
-    if (['OWNER', 'SUPERADMIN'].includes(user.role)) {
-      links.push({ to: '/price-list', label: 'Price List', icon: Package });
-    }
 
     if (user.role === 'SUPERADMIN') {
       links.push(
