@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/auth';
-import { logActivity } from '@/lib/activityLogger';
+// import { logActivity } from '@/lib/activityLogger';
 import type { Client } from '@/types/supabase';
 import { clientEvents } from '@/lib/eventBus';
 import { performanceThresholds } from '../config';
 import { toast } from 'react-toastify';
+import { useClientHistory, ACTIVITY_TYPES } from './useClientHistory';
 
 export const useClients = () => {
   const { user } = useAuthStore();
+  const { logActivity } = useClientHistory();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -125,22 +127,23 @@ export const useClients = () => {
 
       await fetchClients(); // Refresh the list
 
-      // Log activity
-      await logActivity({
-        action_type: 'created',
-        resource_type: 'client',
-        resource_name: clientData.company_name,
-        details: {
-          client_number: clientNumber,
-          business_type: clientData.business_type,
-          tax_form: clientData.tax_form,
-          vat_status: clientData.vat_status,
-        },
-      });
+      // Manual logging for creation (automatic triggers removed)
+      try {
+        await logActivity({
+          clientId: data[0].id,
+          activityType: ACTIVITY_TYPES.CREATED,
+          activityTitle: 'Client created',
+          activityDescription: `Created client: ${clientData.company_name}`,
+          newData: clientData,
+          preventDuplicates: true,
+        });
+      } catch (logError) {
+        console.error('Error logging client creation:', logError);
+      }
 
       // Emit event for other modules
       clientEvents.created({
-        id: data.id,
+        id: data[0].id,
         name: clientData.company_name,
         email: clientData.email,
         client_number: clientNumber,
@@ -169,13 +172,19 @@ export const useClients = () => {
 
       await fetchClients(); // Refresh the list
 
-      // Log activity
-      await logActivity({
-        action_type: 'updated',
-        resource_type: 'client',
-        resource_name: updates.company_name || 'Client',
-        details: updates,
-      });
+      // Manual logging for updates (automatic triggers removed)
+      try {
+        await logActivity({
+          clientId: clientId,
+          activityType: ACTIVITY_TYPES.UPDATED,
+          activityTitle: 'Client updated',
+          activityDescription: `Updated client: ${updates.company_name || 'Client'}`,
+          newData: updates,
+          preventDuplicates: true,
+        });
+      } catch (logError) {
+        console.error('Error logging client update:', logError);
+      }
 
       // Emit event for other modules
       clientEvents.updated({
@@ -207,13 +216,19 @@ export const useClients = () => {
 
       await fetchClients(); // Refresh the list
 
-      // Log activity
-      await logActivity({
-        action_type: 'deleted',
-        resource_type: 'client',
-        resource_name: clientToDelete?.company_name || 'Client',
-        details: { client_number: clientToDelete?.client_number },
-      });
+      // Manual logging for deletion (automatic triggers removed)
+      try {
+        await logActivity({
+          clientId: clientId,
+          activityType: ACTIVITY_TYPES.DELETED,
+          activityTitle: 'Client deleted',
+          activityDescription: `Deleted client: ${clientToDelete?.company_name || 'Client'}`,
+          oldData: clientToDelete,
+          preventDuplicates: true,
+        });
+      } catch (logError) {
+        console.error('Error logging client deletion:', logError);
+      }
 
       // Emit event for other modules
       clientEvents.deleted({
@@ -285,6 +300,92 @@ export const useClients = () => {
     }
   };
 
+  const logClientView = useCallback(
+    async (clientId: string, clientName: string) => {
+      // Debounce to prevent rapid successive calls
+      const debounceKey = `view_${clientId}`;
+      const now = Date.now();
+      const lastCall = (window as any).__clientViewDebounce?.[debounceKey] || 0;
+
+      // Only log if it's been at least 5 seconds since last call for this client
+      if (now - lastCall < 5000) {
+        return;
+      }
+
+      // Update debounce tracker
+      if (!(window as any).__clientViewDebounce) {
+        (window as any).__clientViewDebounce = {};
+      }
+      (window as any).__clientViewDebounce[debounceKey] = now;
+
+      try {
+        await logActivity({
+          clientId,
+          activityType: ACTIVITY_TYPES.VIEWED,
+          activityTitle: 'Client viewed',
+          activityDescription: `Viewed client "${clientName}" details`,
+          preventDuplicates: true, // Prevent multiple view logs within 30 minutes
+        });
+      } catch (error) {
+        console.warn('Error logging client view:', error);
+        // Silently fail for logging - don't break the UI
+        // This is non-critical functionality
+      }
+    },
+    [logActivity]
+  );
+
+  const logClientContact = async (
+    clientId: string,
+    clientName: string,
+    contactType: 'email' | 'phone' | 'meeting',
+    description?: string
+  ) => {
+    try {
+      const activityTypes = {
+        email: ACTIVITY_TYPES.EMAIL_SENT,
+        phone: ACTIVITY_TYPES.PHONE_CALL,
+        meeting: ACTIVITY_TYPES.MEETING_COMPLETED,
+      };
+
+      const titles = {
+        email: 'Email sent',
+        phone: 'Phone call made',
+        meeting: 'Meeting completed',
+      };
+
+      await logActivity({
+        clientId,
+        activityType: activityTypes[contactType],
+        activityTitle: titles[contactType],
+        activityDescription:
+          description || `${titles[contactType]} with client "${clientName}"`,
+      });
+    } catch (error) {
+      console.error('Error logging client contact:', error);
+    }
+  };
+
+  const logCustomActivity = async (
+    clientId: string,
+    activityType: string,
+    title: string,
+    description?: string,
+    additionalData?: Record<string, unknown>
+  ) => {
+    try {
+      await logActivity({
+        clientId,
+        activityType,
+        activityTitle: title,
+        activityDescription: description,
+        newData: additionalData,
+      });
+    } catch (error) {
+      console.error('Error logging custom activity:', error);
+    }
+  };
+
   return {
     clients,
     loading,
@@ -297,5 +398,9 @@ export const useClients = () => {
     filterByStatus,
     filterByTaxForm,
     getNextClientNumber,
+    // History logging methods
+    logClientView,
+    logClientContact,
+    logCustomActivity,
   };
 };

@@ -24,9 +24,17 @@ export { AddClientPage } from './pages/AddClientPage';
 export { EditClientPage } from './pages/EditClientPage';
 export { ClientViewPage } from './pages/ClientViewPage';
 export { ClientCard } from './components/ClientCard';
+export { ClientHistoryTimeline } from './components/ClientHistoryTimeline';
 
 // Hook exports
 export { useClients } from './hooks/useClients';
+export { useClientHistory, ACTIVITY_TYPES } from './hooks/useClientHistory';
+export type {
+  ClientHistoryActivity,
+  ClientActivitySummary,
+  LogActivityParams,
+  ActivityType,
+} from './hooks/useClientHistory';
 
 // API exports for direct access
 export { clientsAPI } from './api';
