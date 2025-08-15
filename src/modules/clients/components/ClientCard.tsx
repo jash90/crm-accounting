@@ -129,16 +129,16 @@ export const ClientCard: React.FC<ClientCardProps> = ({
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-3">
               <div className="flex-shrink-0">
-                <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Building2 className="h-6 w-6 text-blue-600" />
+                <div className="h-12 w-12 bg-primary-100 rounded-full flex items-center justify-center">
+                  <Building2 className="h-6 w-6 text-primary-600" />
                 </div>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-2">
-                  <h3 className="text-lg font-medium text-gray-900 truncate hover:text-blue-600 transition-colors">
+                  <h3 className="text-lg font-medium text-gray-900 truncate hover:text-primary-600 transition-colors">
                     {client.company_name}
                   </h3>
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-primary-800">
                     #{client.client_number}
                   </span>
                 </div>

@@ -32,8 +32,8 @@ export const ClientsPage: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-2 text-surface-600 dark:text-surface-400">Loading...</p>
         </div>
       </div>
     );
@@ -106,7 +106,7 @@ export const ClientsPage: React.FC = () => {
 
         <button
           onClick={() => navigate('/clients/add')}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Client
@@ -126,7 +126,7 @@ export const ClientsPage: React.FC = () => {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-primary-500 sm:text-sm"
                 placeholder="Search clients, companies, business types..."
               />
             </div>
@@ -157,11 +157,11 @@ export const ClientsPage: React.FC = () => {
         {(searchTerm || statusFilter !== 'all') && (
           <div className="mt-4 flex flex-wrap gap-2">
             {searchTerm && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                 Search: "{searchTerm}"
                 <button
                   onClick={() => setSearchTerm('')}
-                  className="ml-2 text-blue-600 hover:text-blue-800"
+                  className="ml-2 text-primary-600 hover:text-blue-800"
                 >
                   ×
                 </button>

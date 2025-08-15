@@ -117,7 +117,7 @@ export const ClientViewPage: React.FC = () => {
             <div className="mt-6">
               <Link
                 to="/clients"
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Clients
@@ -302,8 +302,8 @@ export const ClientViewPage: React.FC = () => {
         {/* Client Title */}
         <div className="mb-8">
           <div className="flex items-center space-x-3">
-            <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <Building2 className="h-6 w-6 text-blue-600" />
+            <div className="h-12 w-12 bg-primary-100 rounded-full flex items-center justify-center">
+              <Building2 className="h-6 w-6 text-primary-600" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
@@ -331,7 +331,7 @@ export const ClientViewPage: React.FC = () => {
                 onClick={() => setActiveTab('details')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'details'
-                    ? 'border-blue-500 text-blue-600'
+                    ? 'border-primary-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
@@ -474,7 +474,7 @@ export const ClientViewPage: React.FC = () => {
                         <Mail className="h-4 w-4 text-gray-400 mr-2" />
                         <a
                           href={`mailto:${client.email}`}
-                          className="text-sm text-blue-600 hover:text-blue-800"
+                          className="text-sm text-blue-600 hover:text-primary-800"
                         >
                           {client.email}
                         </a>

@@ -45,7 +45,7 @@ export const ModuleDialog: React.FC<ModuleDialogProps> = ({
               </p>
               <button
                 onClick={onClose}
-                className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
+                className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:text-sm"
               >
                 Close
               </button>
@@ -108,8 +108,8 @@ export const ModuleDialog: React.FC<ModuleDialogProps> = ({
           </div>
 
           <div className="sm:flex sm:items-start">
-            <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-              <Package className="h-6 w-6 text-blue-600" />
+            <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-primary-100 sm:mx-0 sm:h-10 sm:w-10">
+              <Package className="h-6 w-6 text-primary-600" />
             </div>
             <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
               <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -193,7 +193,7 @@ export const ModuleDialog: React.FC<ModuleDialogProps> = ({
                           type="checkbox"
                           checked={isPublic}
                           onChange={(e) => setIsPublic(e.target.checked)}
-                          className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                          className="focus:ring-blue-500 h-4 w-4 text-primary-600 border-gray-300 rounded"
                         />
                       </div>
                       <div className="ml-3 text-sm">
@@ -216,7 +216,7 @@ export const ModuleDialog: React.FC<ModuleDialogProps> = ({
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading
                       ? 'Saving...'

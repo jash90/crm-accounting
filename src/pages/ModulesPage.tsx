@@ -77,7 +77,7 @@ export const ModulesPage: React.FC = () => {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{getPageTitle()}</h1>
-          <p className="mt-2 text-gray-600">{getPageDescription()}</p>
+          <p className="mt-2 text-surface-600 dark:text-surface-400">{getPageDescription()}</p>
         </div>
         
         {(user?.role === 'SUPERADMIN' || user?.role === 'OWNER') && (
@@ -96,7 +96,7 @@ export const ModulesPage: React.FC = () => {
       {/* Module Grid */}
       {loading ? (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
           <p className="mt-2 text-gray-600">Loading modules...</p>
         </div>
       ) : modules.length === 0 ? (
