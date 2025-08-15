@@ -8,7 +8,7 @@ export const AcceptInvitePage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const navigate = useNavigate();
-  const { acceptInvite, loading } = useAuthStore();
+  const { acceptInvite, loading, user } = useAuthStore();
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -16,11 +16,18 @@ export const AcceptInvitePage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
+    // Redirect if already authenticated
+    if (user) {
+      toast.info('You are already logged in');
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+
     if (!token) {
       toast.error('Invalid invitation link');
       navigate('/login');
     }
-  }, [token, navigate]);
+  }, [token, navigate, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +49,9 @@ export const AcceptInvitePage: React.FC = () => {
 
     try {
       await acceptInvite(token, password);
-      toast.success('Invitation accepted! You can now sign in with your credentials.');
+      toast.success(
+        'Invitation accepted! You can now sign in with your credentials.'
+      );
       navigate('/login');
     } catch (error: any) {
       toast.error(error.message || 'Failed to accept invitation');
@@ -71,7 +80,10 @@ export const AcceptInvitePage: React.FC = () => {
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Create Password
               </label>
               <div className="mt-1 relative">
@@ -104,7 +116,10 @@ export const AcceptInvitePage: React.FC = () => {
             </div>
 
             <div>
-              <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="confirm-password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Confirm Password
               </label>
               <div className="mt-1 relative">
@@ -150,7 +165,9 @@ export const AcceptInvitePage: React.FC = () => {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Already have an account?</span>
+                <span className="px-2 bg-white text-gray-500">
+                  Already have an account?
+                </span>
               </div>
             </div>
 

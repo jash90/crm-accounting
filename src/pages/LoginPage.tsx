@@ -1,17 +1,30 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { LoginForm } from '@/components/auth/LoginForm';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Building2 } from 'lucide-react';
 import { SimpleThemeToggle } from '@/components/ui/ThemeToggle';
+import { useAuthStore } from '@/stores/auth';
 
 export const LoginPage: React.FC = () => {
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/dashboard';
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user) {
+      navigate(from, { replace: true });
+    }
+  }, [user, navigate, from]);
+
   return (
     <div className="min-h-screen bg-surface-50 dark:bg-surface-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       {/* Theme Toggle */}
       <div className="absolute top-4 right-4">
         <SimpleThemeToggle />
       </div>
-      
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <Building2 className="h-12 w-12 text-primary-600" />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth';
 import { toast } from 'react-toastify';
@@ -8,19 +8,26 @@ export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn, loading } = useAuthStore();
+  const { signIn, loading, user } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
 
   const from = location.state?.from?.pathname || '/dashboard';
 
+  // Navigate when user is authenticated
+  useEffect(() => {
+    if (user) {
+      navigate(from, { replace: true });
+    }
+  }, [user, navigate, from]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       await signIn(email, password);
       toast.success('Successfully signed in!');
-      navigate(from, { replace: true });
+      // Navigation will happen via the useEffect when user state updates
     } catch (error: any) {
       toast.error(error.message || 'Failed to sign in');
     }
@@ -29,7 +36,10 @@ export const LoginForm: React.FC = () => {
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-gray-700"
+        >
           Email address
         </label>
         <div className="mt-1">
@@ -48,7 +58,10 @@ export const LoginForm: React.FC = () => {
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="password"
+          className="block text-sm font-medium text-gray-700"
+        >
           Password
         </label>
         <div className="mt-1 relative">
@@ -90,8 +103,17 @@ export const LoginForm: React.FC = () => {
       <div className="text-sm text-gray-600">
         <div className="bg-blue-50 p-3 rounded text-xs">
           <p className="font-medium text-blue-800 mb-1">Getting Started:</p>
-          <p className="text-blue-700">Don't have an account? <a href="/register" className="underline">Register here</a> to create your company.</p>
-          <p className="text-blue-700 mt-1">Already have a Supabase account? Create your user profile in the database first.</p>
+          <p className="text-blue-700">
+            Don't have an account?{' '}
+            <a href="/register" className="underline">
+              Register here
+            </a>{' '}
+            to create your company.
+          </p>
+          <p className="text-blue-700 mt-1">
+            Already have a Supabase account? Create your user profile in the
+            database first.
+          </p>
         </div>
       </div>
     </form>

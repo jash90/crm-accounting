@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth';
 import { toast } from 'react-toastify';
@@ -11,8 +11,15 @@ export const RegisterForm: React.FC = () => {
   const [companyName, setCompanyName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { signUp, loading } = useAuthStore();
+  const { signUp, loading, user } = useAuthStore();
   const navigate = useNavigate();
+
+  // Navigate when user is authenticated
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,8 +36,10 @@ export const RegisterForm: React.FC = () => {
 
     try {
       await signUp(email, password, companyName);
-      toast.success('Company account created successfully! Welcome to your dashboard.');
-      navigate('/dashboard');
+      toast.success(
+        'Company account created successfully! Welcome to your dashboard.'
+      );
+      // Navigation will happen via the useEffect when user state updates
     } catch (error: any) {
       toast.error(error.message || 'Failed to create account');
     }
@@ -39,7 +48,10 @@ export const RegisterForm: React.FC = () => {
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="company-name" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="company-name"
+          className="block text-sm font-medium text-gray-700"
+        >
           Company Name
         </label>
         <div className="mt-1 relative">
@@ -60,7 +72,10 @@ export const RegisterForm: React.FC = () => {
       </div>
 
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-gray-700"
+        >
           Email address
         </label>
         <div className="mt-1">
@@ -79,7 +94,10 @@ export const RegisterForm: React.FC = () => {
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="password"
+          className="block text-sm font-medium text-gray-700"
+        >
           Password
         </label>
         <div className="mt-1 relative">
@@ -112,7 +130,10 @@ export const RegisterForm: React.FC = () => {
       </div>
 
       <div>
-        <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="confirm-password"
+          className="block text-sm font-medium text-gray-700"
+        >
           Confirm Password
         </label>
         <div className="mt-1 relative">
@@ -153,8 +174,9 @@ export const RegisterForm: React.FC = () => {
 
       <div className="text-xs text-gray-500">
         <p>
-          By creating an account, you agree to our Terms of Service and Privacy Policy.
-          You will be the owner of your company account and can invite team members.
+          By creating an account, you agree to our Terms of Service and Privacy
+          Policy. You will be the owner of your company account and can invite
+          team members.
         </p>
       </div>
     </form>
