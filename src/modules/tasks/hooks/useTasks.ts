@@ -380,13 +380,24 @@ export const useTasks = () => {
           return currentTasks;
         }
 
-        // Always update with the confirmed database values to ensure consistency
+        // Ensure the database response matches our optimistic update
+        const confirmedStatus = data.status || newStatus;
+        const confirmedColumn = data.board_column || newColumn || currentTask.board_column;
+        
+        // Only update if there's actually a difference
+        if (currentTask.status === confirmedStatus && 
+            currentTask.board_column === confirmedColumn &&
+            currentTask.updated_at >= (data.updated_at || new Date().toISOString())) {
+          console.log('✅ Optimistic state already matches database, no update needed');
+          return currentTasks;
+        }
+
         const updatedTasks = currentTasks.map(t => {
           if (t.id === taskId) {
             return {
               ...t,
-              status: data.status || newStatus,
-              board_column: data.board_column || newColumn || t.board_column,
+              status: confirmedStatus,
+              board_column: confirmedColumn,
               updated_at: data.updated_at || new Date().toISOString()
             };
           }
@@ -395,8 +406,9 @@ export const useTasks = () => {
         
         console.log('✅ State confirmed with database response:', {
           taskId,
-          confirmedStatus: data.status || newStatus,
-          confirmedColumn: data.board_column || newColumn,
+          confirmedStatus,
+          confirmedColumn,
+          wasOptimistic: currentTask.status !== confirmedStatus || currentTask.board_column !== confirmedColumn,
           taskAfterConfirmation: updatedTasks.find(t => t.id === taskId)
         });
         

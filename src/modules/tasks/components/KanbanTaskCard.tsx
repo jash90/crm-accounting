@@ -32,6 +32,11 @@ export const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
     data: {
       type: 'task',
       task: task,
+      sortable: {
+        containerId: task.board_column,
+        items: [task.id],
+        index: 0,
+      },
     },
   });
 

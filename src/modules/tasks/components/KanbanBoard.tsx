@@ -9,9 +9,11 @@ import {
   TouchSensor,
   useSensor,
   useSensors,
-  closestCorners,
+  closestCenter,
   pointerWithin,
   rectIntersection,
+  getFirstCollision,
+  CollisionDetection,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -40,16 +42,45 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
-        distance: 8, // Slightly higher to prevent accidental drags
+        distance: 3, // Lower threshold for better responsiveness
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 200,
-        tolerance: 5,
+        delay: 150,
+        tolerance: 8,
       },
     })
   );
+
+  // Custom collision detection that prioritizes columns over tasks
+  const customCollisionDetection: CollisionDetection = useCallback((args) => {
+    // First, get all collisions
+    const pointerCollisions = pointerWithin(args);
+    const rectCollisions = rectIntersection(args);
+    
+    // Combine and prioritize column collisions
+    const allCollisions = [...pointerCollisions, ...rectCollisions];
+    
+    // Filter for column collisions first
+    const columnCollisions = allCollisions.filter(collision => {
+      const data = args.droppableContainers.get(collision.id)?.data.current;
+      return data?.type === 'column';
+    });
+    
+    // If we have column collisions, return the first one
+    if (columnCollisions.length > 0) {
+      return [columnCollisions[0]];
+    }
+    
+    // Otherwise, return task collisions
+    const taskCollisions = allCollisions.filter(collision => {
+      const data = args.droppableContainers.get(collision.id)?.data.current;
+      return data?.type === 'task';
+    });
+    
+    return taskCollisions.length > 0 ? [taskCollisions[0]] : [];
+  }, []);
 
   // Group tasks by board column
   const tasksByColumn = useMemo(() => {
@@ -133,13 +164,31 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     
     if (!over) return;
     
+    const overData = over.data?.current;
+    const activeTask = tasks.find(t => t.id === active.id);
+    
+    if (!activeTask) return;
+    
+    // Determine target column
+    let targetColumn: string | null = null;
+    
+    if (overData?.type === 'column') {
+      targetColumn = overData.columnId;
+    } else if (overData?.type === 'task') {
+      const targetTask = tasks.find(t => t.id === over.id);
+      targetColumn = targetTask?.board_column || null;
+    }
+    
     // Log drag over for debugging
     console.log('🎯 Drag Over:', { 
       activeId: active.id, 
       overId: over.id,
-      overType: over.data?.current?.type 
+      overType: overData?.type,
+      currentColumn: activeTask.board_column,
+      targetColumn,
+      wouldMove: targetColumn && targetColumn !== activeTask.board_column
     });
-  }, []);
+  }, [tasks]);
 
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -151,36 +200,53 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     }
 
     const taskId = active.id as string;
-    const overId = over.id as string;
-
-    // Find the task being dragged
     const task = tasks.find(t => t.id === taskId);
+    
     if (!task) {
       console.error('❌ Task not found:', taskId);
       return;
     }
 
-    // Determine the target column
-    let targetColumn: string;
+    // Determine target column with improved logic
+    let targetColumn: string | null = null;
+    const overData = over.data?.current;
     
-    // Check if dropped directly on a column
-    const columnMatch = DEFAULT_BOARD_COLUMNS.find(col => col.id === overId);
-    if (columnMatch) {
-      targetColumn = columnMatch.id;
+    if (overData?.type === 'column') {
+      // Dropped directly on a column
+      targetColumn = overData.columnId;
       console.log('🎯 Dropped on column:', targetColumn);
-    } else {
-      // Dropped on a task - find which column that task belongs to
-      const targetTask = tasks.find(t => t.id === overId);
-      if (targetTask && targetTask.board_column) {
+    } else if (overData?.type === 'task') {
+      // Dropped on a task - use that task's column
+      const targetTask = tasks.find(t => t.id === over.id);
+      if (targetTask) {
         targetColumn = targetTask.board_column;
         console.log('🎯 Dropped on task in column:', targetColumn);
-      } else {
-        console.error('❌ Could not determine target column');
-        return;
+      }
+    } else {
+      // Fallback: check if overId matches a column directly
+      const columnMatch = DEFAULT_BOARD_COLUMNS.find(col => col.id === over.id);
+      if (columnMatch) {
+        targetColumn = columnMatch.id;
+        console.log('🎯 Fallback: Dropped on column:', targetColumn);
       }
     }
 
-    // Map column to status
+    if (!targetColumn) {
+      console.error('❌ Could not determine target column', {
+        overId: over.id,
+        overData,
+        availableColumns: DEFAULT_BOARD_COLUMNS.map(c => c.id)
+      });
+      return;
+    }
+
+    // Validate target column
+    const isValidColumn = DEFAULT_BOARD_COLUMNS.some(col => col.id === targetColumn);
+    if (!isValidColumn) {
+      console.error('❌ Invalid target column:', targetColumn);
+      return;
+    }
+
     const newStatus = mapColumnToStatus(targetColumn);
     const newColumn = targetColumn as BoardColumn;
 
@@ -188,7 +254,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
       taskId: task.id,
       title: task.title,
       from: `${task.board_column}/${task.status}`,
-      to: `${newColumn}/${newStatus}`
+      to: `${newColumn}/${newStatus}`,
+      changed: newColumn !== task.board_column || newStatus !== task.status
     });
 
     // Only update if something actually changed
@@ -197,7 +264,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
         console.log('💾 Updating task status...');
         await updateTaskStatus(taskId, newStatus, newColumn);
         console.log('✅ Task status updated successfully');
-        toast.success(`Task moved to ${DEFAULT_BOARD_COLUMNS.find(c => c.id === newColumn)?.title}`);
+        
+        const columnTitle = DEFAULT_BOARD_COLUMNS.find(c => c.id === newColumn)?.title || newColumn;
+        toast.success(`Task moved to ${columnTitle}`);
       } catch (error) {
         console.error('❌ Failed to update task status:', error);
         toast.error('Failed to move task. Please try again.');
@@ -205,7 +274,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     } else {
       console.log('📌 No change needed - task already in target column');
     }
-  }, [tasks, updateTaskStatus]);
+  }, [tasks, updateTaskStatus, mapColumnToStatus]);
 
   const mapColumnToStatus = useCallback((column: string): string => {
     const statusMap: Record<string, string> = {
@@ -251,7 +320,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={customCollisionDetection}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
