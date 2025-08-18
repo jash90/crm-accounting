@@ -306,16 +306,21 @@ export const useTasks = () => {
       const optimisticUpdates = {
         status: newStatus,
         ...(newColumn && { board_column: newColumn }),
+        updated_at: new Date().toISOString(), // Mark as optimistically updated
       };
-      const updatedTasks = applyOptimisticUpdate(tasks, taskId, optimisticUpdates);
-      console.log('🔄 Optimistic update: Setting new tasks state', { 
-        taskId, 
-        newStatus, 
-        newColumn,
-        from: `${originalColumn}/${originalStatus}`,
-        to: `${newColumn}/${newStatus}`
+      
+      setTasks(currentTasks => {
+        const updatedTasks = applyOptimisticUpdate(currentTasks, taskId, optimisticUpdates);
+        console.log('🔄 Optimistic update applied:', { 
+          taskId, 
+          newStatus, 
+          newColumn,
+          from: `${originalColumn}/${originalStatus}`,
+          to: `${newColumn}/${newStatus}`,
+          taskAfterUpdate: updatedTasks.find(t => t.id === taskId)
+        });
+        return [...updatedTasks]; // Ensure new array reference
       });
-      setTasks([...updatedTasks]); // Ensure new array reference
 
       // Prepare database updates
       const updates: Record<string, unknown> = { status: newStatus };
@@ -333,9 +338,22 @@ export const useTasks = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Database update failed:', error);
+        throw error;
+      }
       
-      console.log('✅ Database update successful', { taskId, updatedTask: data });
+      if (!data) {
+        console.error('❌ Database update returned no data');
+        throw new Error('Database update failed - no data returned');
+      }
+      
+      console.log('✅ Database update successful', { 
+        taskId, 
+        updatedTask: data,
+        confirmedStatus: data.status,
+        confirmedColumn: data.board_column 
+      });
 
       // Log activity if client is associated and Clients module is available
       if (taskToUpdate.client_id && isModuleAvailable('clients')) {
@@ -354,8 +372,25 @@ export const useTasks = () => {
         }
       }
 
-      // Update the local state with the confirmed database values
+      // Verify the optimistic update matches the database response
       setTasks(currentTasks => {
+        const currentTask = currentTasks.find(t => t.id === taskId);
+        if (!currentTask) {
+          console.warn('⚠️ Task not found in current state during confirmation');
+          return currentTasks;
+        }
+
+        // Only update if the database response differs from our optimistic state
+        const needsUpdate = currentTask.status !== newStatus || 
+                           (newColumn && currentTask.board_column !== newColumn) ||
+                           !currentTask.updated_at || 
+                           currentTask.updated_at < (data.updated_at || new Date().toISOString());
+
+        if (!needsUpdate) {
+          console.log('✅ Optimistic state already matches database, no update needed');
+          return currentTasks;
+        }
+
         const updatedTasks = currentTasks.map(t => {
           if (t.id === taskId) {
             return {
@@ -367,12 +402,15 @@ export const useTasks = () => {
           }
           return t;
         });
+        
         console.log('🔄 Final state update after database confirmation:', {
           taskId,
           newStatus,
           newColumn,
+          wasOptimistic: !needsUpdate,
           taskFound: updatedTasks.find(t => t.id === taskId)
         });
+        
         return updatedTasks;
       });
 
@@ -382,17 +420,19 @@ export const useTasks = () => {
     } catch (err: unknown) {
       console.error('❌ Database update failed, rolling back', err);
       
-      // Rollback optimistic update on error using fresh task reference
+      // Rollback optimistic update on error
       setTasks(currentTasks => {
         const rollbackUpdates = {
           status: originalStatus,
           board_column: originalColumn,
+          updated_at: taskToUpdate.updated_at, // Restore original timestamp
         };
         const rolledBackTasks = applyOptimisticUpdate(currentTasks, taskId, rollbackUpdates);
         console.log('🔄 Rolling back optimistic update', { 
           taskId, 
           originalStatus, 
           originalColumn,
+          error: err instanceof Error ? err.message : 'Unknown error',
           taskAfterRollback: rolledBackTasks.find(t => t.id === taskId)
         });
         return [...rolledBackTasks]; // Ensure new array reference
