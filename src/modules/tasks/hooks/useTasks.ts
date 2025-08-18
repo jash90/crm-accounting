@@ -372,7 +372,7 @@ export const useTasks = () => {
         }
       }
 
-      // Verify the optimistic update matches the database response
+      // Confirm the optimistic update with database response
       setTasks(currentTasks => {
         const currentTask = currentTasks.find(t => t.id === taskId);
         if (!currentTask) {
@@ -380,35 +380,24 @@ export const useTasks = () => {
           return currentTasks;
         }
 
-        // Only update if the database response differs from our optimistic state
-        const needsUpdate = currentTask.status !== newStatus || 
-                           (newColumn && currentTask.board_column !== newColumn) ||
-                           !currentTask.updated_at || 
-                           currentTask.updated_at < (data.updated_at || new Date().toISOString());
-
-        if (!needsUpdate) {
-          console.log('✅ Optimistic state already matches database, no update needed');
-          return currentTasks;
-        }
-
+        // Always update with the confirmed database values to ensure consistency
         const updatedTasks = currentTasks.map(t => {
           if (t.id === taskId) {
             return {
               ...t,
-              status: newStatus,
-              ...(newColumn && { board_column: newColumn }),
+              status: data.status || newStatus,
+              board_column: data.board_column || newColumn || t.board_column,
               updated_at: data.updated_at || new Date().toISOString()
             };
           }
           return t;
         });
         
-        console.log('🔄 Final state update after database confirmation:', {
+        console.log('✅ State confirmed with database response:', {
           taskId,
-          newStatus,
-          newColumn,
-          wasOptimistic: !needsUpdate,
-          taskFound: updatedTasks.find(t => t.id === taskId)
+          confirmedStatus: data.status || newStatus,
+          confirmedColumn: data.board_column || newColumn,
+          taskAfterConfirmation: updatedTasks.find(t => t.id === taskId)
         });
         
         return updatedTasks;

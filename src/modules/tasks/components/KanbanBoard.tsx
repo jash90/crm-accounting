@@ -196,24 +196,17 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     // Only update if the column actually changed
     if (newColumn !== task.board_column || newStatus !== task.status) {
       console.log(`🎯 Drag & Drop: Moving task "${task.title}" from ${task.board_column}/${task.status} to ${newColumn}/${newStatus}`);
-      console.log('📊 Before update - Task state:', { 
-        taskId, 
-        currentColumn: task.board_column, 
-        currentStatus: task.status,
-        targetColumn: newColumn,
-        targetStatus: newStatus
-      });
       
       try {
+        // The updateTaskStatus function handles optimistic updates internally
+        // This ensures the card stays in place immediately while the database updates
         await updateTaskStatus(taskId, newStatus, newColumn);
         console.log('✅ Drag & Drop: Task status updated successfully');
-        
-        // Note: Verification removed - optimistic updates ensure correct state
-        // The task should already be in the correct state due to optimistic updates
         
       } catch (error) {
         console.error('❌ Drag & Drop: Failed to update task status:', error);
         toast.error('Failed to update task status. Please try again.');
+        // The rollback is handled automatically in updateTaskStatus
       }
     } else {
       console.log('📌 Drag & Drop: No change needed - task already in correct column');

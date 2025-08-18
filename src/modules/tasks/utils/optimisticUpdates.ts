@@ -26,12 +26,21 @@ export const applyOptimisticUpdate = (
   taskId: string,
   updates: Partial<Task>
 ): Task[] => {
-  return tasks.map((task) => {
+  const updatedTasks = tasks.map((task) => {
     if (task.id === taskId) {
-      return createOptimisticTaskUpdate(task, updates);
+      const updatedTask = createOptimisticTaskUpdate(task, updates);
+      console.log('🔄 Optimistic update applied to task:', {
+        taskId,
+        before: { status: task.status, board_column: task.board_column },
+        after: { status: updatedTask.status, board_column: updatedTask.board_column },
+        updates
+      });
+      return updatedTask;
     }
     return task;
   });
+  
+  return updatedTasks;
 };
 
 /**
