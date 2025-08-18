@@ -354,10 +354,23 @@ export const useTasks = () => {
         }
       }
 
+      // Update the local state with the confirmed database values
+      setTasks(currentTasks => {
+        return currentTasks.map(t => {
+          if (t.id === taskId) {
+            return {
+              ...t,
+              status: newStatus,
+              ...(newColumn && { board_column: newColumn }),
+              updated_at: data.updated_at || new Date().toISOString()
+            };
+          }
+          return t;
+        });
+      });
+
       toast.success('Task status updated');
-      
-      // DON'T call fetchTasks() here - keep the optimistic update!
-      console.log('🎉 Task update complete - optimistic state preserved');
+      console.log('🎉 Task update complete - state synchronized with database');
       
     } catch (err: unknown) {
       console.error('❌ Database update failed, rolling back', err);
