@@ -112,11 +112,11 @@ export const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
   };
 
   const cardClasses = `
-    bg-white rounded-lg shadow-sm border border-gray-200 p-4 cursor-pointer
+    bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 cursor-pointer
     hover:shadow-md transition-all duration-200 group
-    ${isDragging || isSortableDragging ? 'shadow-lg scale-105 rotate-2' : ''}
-    ${isOverdue ? 'border-red-300 bg-red-50' : ''}
-    ${isDueToday ? 'border-yellow-300 bg-yellow-50' : ''}
+    ${isDragging || isSortableDragging ? 'opacity-50' : ''}
+    ${isOverdue ? 'border-red-300 bg-red-50 dark:border-red-600 dark:bg-red-900/20' : ''}
+    ${isDueToday ? 'border-yellow-300 bg-yellow-50 dark:border-yellow-600 dark:bg-yellow-900/20' : ''}
     ${task.is_statutory ? 'border-l-4 border-l-purple-500' : ''}
   `;
 

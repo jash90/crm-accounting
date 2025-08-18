@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { KanbanTaskCard } from './KanbanTaskCard';
@@ -14,7 +14,7 @@ interface KanbanColumnProps {
 }
 
 export const KanbanColumn: React.FC<KanbanColumnProps> = ({ column, tasks }) => {
-  const { setNodeRef, isOver } = useDroppable({
+  const { setNodeRef, isOver, active } = useDroppable({
     id: column.id,
     data: {
       type: 'column',
@@ -22,9 +22,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ column, tasks }) => 
     },
   });
 
-  if (isOver) {
-    console.log(`🎯 Column ${column.id} is being hovered over`);
-  }
+  const taskIds = useMemo(() => tasks.map(task => task.id), [tasks]);
 
   const getPriorityCount = (priority: string) => {
     return tasks.filter(task => task.priority === priority).length;
@@ -49,7 +47,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ column, tasks }) => 
       <div
         ref={setNodeRef}
         className={`rounded-lg p-4 h-full transition-all duration-200 ${
-          isOver ? 'ring-2 ring-blue-500 ring-opacity-50 bg-blue-50 scale-105' : ''
+          isOver ? 'ring-2 ring-blue-500 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20 scale-[1.02]' : ''
         } ${column.color} min-h-[600px]`}
       >
         {/* Column Header */}
@@ -93,18 +91,22 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ column, tasks }) => 
         )}
 
         {/* Tasks */}
-        <SortableContext items={tasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
-          <div className="space-y-3">
+        <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
+          <div className={`space-y-3 min-h-[200px] ${isOver ? 'bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-2' : ''}`}>
             {tasks.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className={`text-center py-8 text-gray-500 transition-all duration-200 ${
+                isOver ? 'text-blue-600 dark:text-blue-400' : ''
+              }`}>
                 <div className="text-4xl mb-2">📋</div>
-                <p className="text-sm">No tasks</p>
+                <p className="text-sm font-medium">
+                  {isOver ? 'Drop task here' : 'No tasks'}
+                </p>
                 <p className="text-xs text-gray-400">
+                  {column.id === 'backlog' && 'Plan your upcoming tasks here'}
                   {column.id === 'todo' && 'Drag tasks here to start working'}
                   {column.id === 'in-progress' && 'Move tasks here when you start work'}
                   {column.id === 'review' && 'Tasks ready for review will appear here'}
                   {column.id === 'completed' && 'Completed tasks will appear here'}
-                  {column.id === 'backlog' && 'Plan your upcoming tasks here'}
                   {column.id === 'cancelled' && 'Cancelled tasks will appear here'}
                 </p>
               </div>
