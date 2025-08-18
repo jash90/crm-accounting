@@ -221,22 +221,18 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   };
 
   const mapColumnToStatus = (column: string): string => {
-    switch (column) {
-      case 'backlog':
-        return 'todo';
-      case 'todo':
-        return 'todo';
-      case 'in-progress':
-        return 'in-progress';
-      case 'review':
-        return 'review';
-      case 'completed':
-        return 'completed';
-      case 'cancelled':
-        return 'cancelled';
-      default:
-        return 'todo';
-    }
+    const statusMap: Record<string, string> = {
+      'backlog': 'todo',
+      'todo': 'todo',
+      'in-progress': 'in-progress',
+      'review': 'review',
+      'completed': 'completed',
+      'cancelled': 'cancelled'
+    };
+    
+    const mappedStatus = statusMap[column] || 'todo';
+    console.log('🗺️ Column to status mapping:', { column, mappedStatus });
+    return mappedStatus;
   };
 
   if (loading) {

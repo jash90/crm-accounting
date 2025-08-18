@@ -356,7 +356,7 @@ export const useTasks = () => {
 
       // Update the local state with the confirmed database values
       setTasks(currentTasks => {
-        return currentTasks.map(t => {
+        const updatedTasks = currentTasks.map(t => {
           if (t.id === taskId) {
             return {
               ...t,
@@ -367,6 +367,13 @@ export const useTasks = () => {
           }
           return t;
         });
+        console.log('🔄 Final state update after database confirmation:', {
+          taskId,
+          newStatus,
+          newColumn,
+          taskFound: updatedTasks.find(t => t.id === taskId)
+        });
+        return updatedTasks;
       });
 
       toast.success('Task status updated');
@@ -382,7 +389,12 @@ export const useTasks = () => {
           board_column: originalColumn,
         };
         const rolledBackTasks = applyOptimisticUpdate(currentTasks, taskId, rollbackUpdates);
-        console.log('🔄 Rolling back optimistic update', { taskId, originalStatus, originalColumn });
+        console.log('🔄 Rolling back optimistic update', { 
+          taskId, 
+          originalStatus, 
+          originalColumn,
+          taskAfterRollback: rolledBackTasks.find(t => t.id === taskId)
+        });
         return [...rolledBackTasks]; // Ensure new array reference
       });
 
