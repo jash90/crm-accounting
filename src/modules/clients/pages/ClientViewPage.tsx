@@ -85,11 +85,11 @@ export const ClientViewPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-background py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-card rounded-lg shadow p-6">
               <div className="space-y-4">
                 <div className="h-6 bg-gray-200 rounded w-1/3"></div>
                 <div className="h-4 bg-gray-200 rounded w-1/2"></div>
@@ -104,7 +104,7 @@ export const ClientViewPage: React.FC = () => {
 
   if (!client) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-background py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <Building2 className="h-12 w-12 text-gray-400 mx-auto" />
@@ -230,14 +230,14 @@ export const ClientViewPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Navigation and Actions */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate('/clients')}
-              className="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors"
+              className="inline-flex items-center text-gray-500 hover:text-card-foreground transition-colors"
             >
               <ArrowLeft className="h-5 w-5 mr-1" />
               Back to Clients
@@ -248,7 +248,7 @@ export const ClientViewPage: React.FC = () => {
               {features.canGenerateInvoices && (
                 <button
                   onClick={handleGenerateInvoice}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-card-foreground bg-card hover:bg-background transition-colors"
                 >
                   <Receipt className="h-4 w-4 mr-2" />
                   Generate Invoice
@@ -258,7 +258,7 @@ export const ClientViewPage: React.FC = () => {
               {features.canManageContracts && (
                 <button
                   onClick={handleManageContracts}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-card-foreground bg-card hover:bg-background transition-colors"
                 >
                   <ScrollText className="h-4 w-4 mr-2" />
                   Contracts
@@ -268,7 +268,7 @@ export const ClientViewPage: React.FC = () => {
               {features.canAttachDocuments && (
                 <button
                   onClick={handleAttachDocument}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-card-foreground bg-card hover:bg-background transition-colors"
                 >
                   <Files className="h-4 w-4 mr-2" />
                   Documents
@@ -278,7 +278,7 @@ export const ClientViewPage: React.FC = () => {
               {canEdit && (
                 <Link
                   to={`/clients/${client.id}/edit`}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-card-foreground bg-card hover:bg-background transition-colors"
                 >
                   <Edit className="h-4 w-4 mr-2" />
                   Edit
@@ -289,7 +289,7 @@ export const ClientViewPage: React.FC = () => {
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 disabled:opacity-50 transition-colors"
+                  className="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-card hover:bg-red-50 disabled:opacity-50 transition-colors"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   {isDeleting ? 'Deleting...' : 'Delete'}
@@ -332,7 +332,7 @@ export const ClientViewPage: React.FC = () => {
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'details'
                     ? 'border-primary-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-500 hover:text-card-foreground hover:border-gray-300'
                 }`}
               >
                 Client Details
@@ -342,7 +342,7 @@ export const ClientViewPage: React.FC = () => {
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'history'
                     ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-500 hover:text-card-foreground hover:border-gray-300'
                 }`}
               >
                 Activity History
@@ -362,7 +362,7 @@ export const ClientViewPage: React.FC = () => {
             {/* Main Information */}
             <div className="lg:col-span-2 space-y-6">
               {/* Basic Information */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-card rounded-lg shadow p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-medium text-gray-900">
                     Basic Information
@@ -379,7 +379,7 @@ export const ClientViewPage: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-card-foreground">
                       Company Name
                     </label>
                     <div className="mt-1 flex items-center">
@@ -399,7 +399,7 @@ export const ClientViewPage: React.FC = () => {
 
                   {client.nip && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-card-foreground">
                         NIP
                       </label>
                       <div className="mt-1 flex items-center">
@@ -416,7 +416,7 @@ export const ClientViewPage: React.FC = () => {
 
                   {client.business_type && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-card-foreground">
                         Business Type
                       </label>
                       <p className="mt-1 text-sm text-gray-900">
@@ -427,7 +427,7 @@ export const ClientViewPage: React.FC = () => {
 
                   {client.employment_form && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-card-foreground">
                         Employment Form
                       </label>
                       <p className="mt-1 text-sm text-gray-900">
@@ -437,7 +437,7 @@ export const ClientViewPage: React.FC = () => {
                   )}
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-card-foreground">
                       Start Date
                     </label>
                     <p className="mt-1 text-sm text-gray-900">
@@ -447,7 +447,7 @@ export const ClientViewPage: React.FC = () => {
 
                   {client.end_date && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-card-foreground">
                         End Date
                       </label>
                       <p className="mt-1 text-sm text-gray-900">
@@ -459,7 +459,7 @@ export const ClientViewPage: React.FC = () => {
               </div>
 
               {/* Contact Information */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-card rounded-lg shadow p-6">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">
                   Contact Information
                 </h2>
@@ -467,7 +467,7 @@ export const ClientViewPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {client.email && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-card-foreground">
                         Email
                       </label>
                       <div className="mt-1 flex items-center">
@@ -492,7 +492,7 @@ export const ClientViewPage: React.FC = () => {
 
                   {client.phone && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-card-foreground">
                         Phone
                       </label>
                       <div className="mt-1 flex items-center">
@@ -517,7 +517,7 @@ export const ClientViewPage: React.FC = () => {
 
                   {client.address && (
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-card-foreground">
                         Address
                       </label>
                       <div className="mt-1 flex items-start">
@@ -540,7 +540,7 @@ export const ClientViewPage: React.FC = () => {
               </div>
 
               {/* Tax Information */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-card rounded-lg shadow p-6">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">
                   Tax Information
                 </h2>
@@ -548,7 +548,7 @@ export const ClientViewPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {client.tax_form && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-card-foreground">
                         Tax Form
                       </label>
                       <div className="mt-1 flex items-center">
@@ -562,7 +562,7 @@ export const ClientViewPage: React.FC = () => {
 
                   {client.vat_status && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-card-foreground">
                         VAT Status
                       </label>
                       <p className="mt-1 text-sm text-gray-900">
@@ -573,7 +573,7 @@ export const ClientViewPage: React.FC = () => {
 
                   {client.vat_frequency && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-card-foreground">
                         VAT Frequency
                       </label>
                       <p className="mt-1 text-sm text-gray-900">
@@ -584,7 +584,7 @@ export const ClientViewPage: React.FC = () => {
 
                   {client.gtu_codes && client.gtu_codes.length > 0 && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-card-foreground">
                         GTU Codes
                       </label>
                       <div className="mt-1 flex flex-wrap gap-1">
@@ -610,7 +610,7 @@ export const ClientViewPage: React.FC = () => {
                           : 'bg-gray-300'
                       } mr-2`}
                     ></div>
-                    <span className="text-sm text-gray-700">
+                    <span className="text-sm text-card-foreground">
                       VAT EU Registration
                     </span>
                   </div>
@@ -620,7 +620,7 @@ export const ClientViewPage: React.FC = () => {
                         client.labor_fund ? 'bg-green-500' : 'bg-gray-300'
                       } mr-2`}
                     ></div>
-                    <span className="text-sm text-gray-700">Labor Fund</span>
+                    <span className="text-sm text-card-foreground">Labor Fund</span>
                   </div>
                   <div className="flex items-center">
                     <div
@@ -628,7 +628,7 @@ export const ClientViewPage: React.FC = () => {
                         client.free_amount_2022 ? 'bg-green-500' : 'bg-gray-300'
                       } mr-2`}
                     ></div>
-                    <span className="text-sm text-gray-700">
+                    <span className="text-sm text-card-foreground">
                       Free Amount 2022
                     </span>
                   </div>
@@ -638,7 +638,7 @@ export const ClientViewPage: React.FC = () => {
                         client.e_szok_system ? 'bg-green-500' : 'bg-gray-300'
                       } mr-2`}
                     ></div>
-                    <span className="text-sm text-gray-700">e-SZOK System</span>
+                    <span className="text-sm text-card-foreground">e-SZOK System</span>
                   </div>
                 </div>
               </div>
@@ -647,7 +647,7 @@ export const ClientViewPage: React.FC = () => {
               {client.zus_details ||
               client.zus_startup_relief ||
               client.zus_startup_relief_months ? (
-                <div className="bg-white rounded-lg shadow p-6">
+                <div className="bg-card rounded-lg shadow p-6">
                   <h2 className="text-lg font-medium text-gray-900 mb-4">
                     ZUS Information
                   </h2>
@@ -655,7 +655,7 @@ export const ClientViewPage: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {client.zus_details && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-card-foreground">
                           ZUS Details
                         </label>
                         <p className="mt-1 text-sm text-gray-900">
@@ -673,14 +673,14 @@ export const ClientViewPage: React.FC = () => {
                   client.aml_group ||
                   client.aml_date ||
                   client.additional_notes) && (
-                  <div className="bg-white rounded-lg shadow p-6">
+                  <div className="bg-card rounded-lg shadow p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-medium text-gray-900">
                         Sensitive Information
                       </h2>
                       <button
                         onClick={() => setShowSensitiveInfo(!showSensitiveInfo)}
-                        className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+                        className="inline-flex items-center text-sm text-gray-500 hover:text-card-foreground"
                       >
                         {showSensitiveInfo ? (
                           <EyeOff className="h-4 w-4 mr-1" />
@@ -695,7 +695,7 @@ export const ClientViewPage: React.FC = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {client.bank_account && (
                           <div>
-                            <label className="block text-sm font-medium text-gray-700">
+                            <label className="block text-sm font-medium text-card-foreground">
                               Bank Account
                             </label>
                             <div className="mt-1 flex items-center">
@@ -719,7 +719,7 @@ export const ClientViewPage: React.FC = () => {
 
                         {client.aml_group && (
                           <div>
-                            <label className="block text-sm font-medium text-gray-700">
+                            <label className="block text-sm font-medium text-card-foreground">
                               AML Group
                             </label>
                             <div className="mt-1 flex items-center">
@@ -733,7 +733,7 @@ export const ClientViewPage: React.FC = () => {
 
                         {client.aml_date && (
                           <div>
-                            <label className="block text-sm font-medium text-gray-700">
+                            <label className="block text-sm font-medium text-card-foreground">
                               AML Date
                             </label>
                             <p className="mt-1 text-sm text-gray-900">
@@ -744,7 +744,7 @@ export const ClientViewPage: React.FC = () => {
 
                         {client.additional_notes && (
                           <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700">
+                            <label className="block text-sm font-medium text-card-foreground">
                               Additional Notes
                             </label>
                             <p className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">
@@ -761,7 +761,7 @@ export const ClientViewPage: React.FC = () => {
             {/* Sidebar */}
             <div className="space-y-6">
               {/* Quick Stats */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-card rounded-lg shadow p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
                   Quick Stats
                 </h3>
@@ -802,7 +802,7 @@ export const ClientViewPage: React.FC = () => {
                 features.canManageContracts ||
                 features.canAttachDocuments ||
                 features.canAssignTasks) && (
-                <div className="bg-white rounded-lg shadow p-6">
+                <div className="bg-card rounded-lg shadow p-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">
                     Available Actions
                   </h3>
@@ -810,7 +810,7 @@ export const ClientViewPage: React.FC = () => {
                     {features.canGenerateInvoices && (
                       <button
                         onClick={handleGenerateInvoice}
-                        className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
+                        className="w-full flex items-center px-3 py-2 text-sm text-card-foreground hover:bg-background rounded-md"
                       >
                         <Receipt className="h-4 w-4 mr-3" />
                         Generate Invoice
@@ -819,7 +819,7 @@ export const ClientViewPage: React.FC = () => {
                     {features.canManageContracts && (
                       <button
                         onClick={handleManageContracts}
-                        className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
+                        className="w-full flex items-center px-3 py-2 text-sm text-card-foreground hover:bg-background rounded-md"
                       >
                         <ScrollText className="h-4 w-4 mr-3" />
                         Manage Contracts
@@ -828,7 +828,7 @@ export const ClientViewPage: React.FC = () => {
                     {features.canAttachDocuments && (
                       <button
                         onClick={handleAttachDocument}
-                        className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
+                        className="w-full flex items-center px-3 py-2 text-sm text-card-foreground hover:bg-background rounded-md"
                       >
                         <Files className="h-4 w-4 mr-3" />
                         Attach Document
@@ -837,7 +837,7 @@ export const ClientViewPage: React.FC = () => {
                     {features.canAssignTasks && (
                       <Link
                         to={`/tasks?clientId=${client.id}`}
-                        className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
+                        className="w-full flex items-center px-3 py-2 text-sm text-card-foreground hover:bg-background rounded-md"
                       >
                         <ListTodo className="h-4 w-4 mr-3" />
                         View Tasks
@@ -852,7 +852,7 @@ export const ClientViewPage: React.FC = () => {
                 client.annexes_2023_status ||
                 client.annexes_2022_sent_date ||
                 client.annexes_2023_sent_date) && (
-                <div className="bg-white rounded-lg shadow p-6">
+                <div className="bg-card rounded-lg shadow p-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">
                     Annexes Status
                   </h3>
@@ -899,14 +899,14 @@ export const ClientViewPage: React.FC = () => {
               {(client.fixed_costs ||
                 client.vehicles_assets ||
                 client.depreciation_info) && (
-                <div className="bg-white rounded-lg shadow p-6">
+                <div className="bg-card rounded-lg shadow p-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">
                     Additional Details
                   </h3>
                   <div className="space-y-4">
                     {client.fixed_costs && client.fixed_costs.length > 0 && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-card-foreground mb-2">
                           Fixed Costs
                         </label>
                         <div className="flex flex-wrap gap-1">
@@ -925,7 +925,7 @@ export const ClientViewPage: React.FC = () => {
                     )}
                     {client.vehicles_assets && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-card-foreground">
                           Vehicles & Assets
                         </label>
                         <p className="mt-1 text-sm text-gray-900">
@@ -935,7 +935,7 @@ export const ClientViewPage: React.FC = () => {
                     )}
                     {client.depreciation_info && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-card-foreground">
                           Depreciation Info
                         </label>
                         <p className="mt-1 text-sm text-gray-900">
@@ -953,7 +953,7 @@ export const ClientViewPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Activity Timeline */}
             <div className="lg:col-span-3">
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-card rounded-lg shadow p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-lg font-medium text-gray-900">
                     Activity Timeline
@@ -1009,7 +1009,7 @@ export const ClientViewPage: React.FC = () => {
             {/* Activity Summary Sidebar */}
             <div className="space-y-6">
               {summary && (
-                <div className="bg-white rounded-lg shadow p-6">
+                <div className="bg-card rounded-lg shadow p-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">
                     Activity Summary
                   </h3>
@@ -1060,7 +1060,7 @@ export const ClientViewPage: React.FC = () => {
               )}
 
               {/* Quick Actions for History */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-card rounded-lg shadow p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
                   Log Activity
                 </h3>
@@ -1070,7 +1070,7 @@ export const ClientViewPage: React.FC = () => {
                       // This could open a modal or form for logging custom activities
                       toast.info('Custom activity logging coming soon!');
                     }}
-                    className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md border border-gray-200"
+                    className="w-full flex items-center px-3 py-2 text-sm text-card-foreground hover:bg-background rounded-md border border-gray-200"
                   >
                     <MessageCircle className="h-4 w-4 mr-3" />
                     Add Note
@@ -1083,7 +1083,7 @@ export const ClientViewPage: React.FC = () => {
                         toast.success('Phone call logged successfully');
                       }
                     }}
-                    className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md border border-gray-200"
+                    className="w-full flex items-center px-3 py-2 text-sm text-card-foreground hover:bg-background rounded-md border border-gray-200"
                   >
                     <Phone className="h-4 w-4 mr-3" />
                     Log Phone Call
@@ -1096,7 +1096,7 @@ export const ClientViewPage: React.FC = () => {
                         toast.success('Email activity logged successfully');
                       }
                     }}
-                    className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md border border-gray-200"
+                    className="w-full flex items-center px-3 py-2 text-sm text-card-foreground hover:bg-background rounded-md border border-gray-200"
                   >
                     <Mail className="h-4 w-4 mr-3" />
                     Log Email Sent
@@ -1106,7 +1106,7 @@ export const ClientViewPage: React.FC = () => {
 
               {/* History Management (Admin Only) */}
               {user?.role === 'SUPERADMIN' || user?.role === 'OWNER' ? (
-                <div className="bg-white rounded-lg shadow p-6">
+                <div className="bg-card rounded-lg shadow p-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">
                     History Management
                   </h3>

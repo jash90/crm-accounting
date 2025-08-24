@@ -9,6 +9,8 @@ import { ToastContainer } from 'react-toastify';
 import { useAuthStore } from '@/stores/auth';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { ErrorBoundary } from '@/components/shared/error-boundary';
+import { PageLoading } from '@/components/shared/loading-spinner';
 
 // Pages
 import { LoginPage } from '@/pages/LoginPage';
@@ -37,22 +39,14 @@ function App() {
 
   // Show loading screen while initializing auth
   if (!initialized || loading) {
-    return (
-      <div className="min-h-screen bg-surface-50 dark:bg-surface-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-surface-600 dark:text-surface-400">
-            Loading application...
-          </p>
-        </div>
-      </div>
-    );
+    return <PageLoading message="Loading application..." />;
   }
 
   return (
-    <Router>
-      <div className="App">
-        <Routes>
+    <ErrorBoundary>
+      <Router>
+        <div className="App">
+          <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -69,19 +63,45 @@ function App() {
             }
           >
             <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="dashboard" element={
+              <ErrorBoundary>
+                <DashboardPage />
+              </ErrorBoundary>
+            } />
 
-            <Route path="clients" element={<ClientsPage />} />
-            <Route path="clients/add" element={<AddClientPage />} />
-            <Route path="clients/:id" element={<ClientViewPage />} />
-            <Route path="clients/:id/edit" element={<EditClientPage />} />
+            <Route path="clients" element={
+              <ErrorBoundary>
+                <ClientsPage />
+              </ErrorBoundary>
+            } />
+            <Route path="clients/add" element={
+              <ErrorBoundary>
+                <AddClientPage />
+              </ErrorBoundary>
+            } />
+            <Route path="clients/:id" element={
+              <ErrorBoundary>
+                <ClientViewPage />
+              </ErrorBoundary>
+            } />
+            <Route path="clients/:id/edit" element={
+              <ErrorBoundary>
+                <EditClientPage />
+              </ErrorBoundary>
+            } />
 
-            <Route path="modules" element={<ModulesPage />} />
+            <Route path="modules" element={
+              <ErrorBoundary>
+                <ModulesPage />
+              </ErrorBoundary>
+            } />
             <Route
               path="invites"
               element={
                 <ProtectedRoute requiredRole="OWNER">
-                  <InvitesPage />
+                  <ErrorBoundary>
+                    <InvitesPage />
+                  </ErrorBoundary>
                 </ProtectedRoute>
               }
             />
@@ -89,27 +109,28 @@ function App() {
 
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
+          </Routes>
 
-        {/* Toast notifications */}
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme={
-            document.documentElement.classList.contains('dark')
-              ? 'dark'
-              : 'light'
-          }
-        />
-      </div>
-    </Router>
+          {/* Toast notifications */}
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme={
+              document.documentElement.classList.contains('dark')
+                ? 'dark'
+                : 'light'
+            }
+          />
+        </div>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

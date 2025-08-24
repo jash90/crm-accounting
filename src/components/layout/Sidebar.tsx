@@ -198,7 +198,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           ? 'relative flex-shrink-0' 
           : 'fixed top-0 left-0 z-50'
         }
-        bg-white dark:bg-surface-900 shadow-xl border-r border-surface-200 dark:border-surface-700 rounded-[5px]
+        bg-background shadow-xl border-r border-border rounded-[5px]
         min-h-fit
         transform transition-all duration-300 ease-out will-change-transform
         ${isDesktop 
@@ -230,11 +230,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 title={isCollapsed ? label : ''}
                 className={`
                   group flex items-center w-full px-3 py-3 rounded-lg text-sm font-medium transition-all duration-300 ease-out
-                  focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-surface-50 dark:focus:ring-offset-surface-900
+                  focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background
                   hover:transform hover:scale-[1.02] active:scale-[0.98]
                   ${isActiveLink(to)
-                    ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100 shadow-md border-l-4 border-primary-600'
-                    : 'text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-800 hover:shadow-sm'
+                    ? 'bg-primary-50 text-primary-700 shadow-md border-l-4 border-primary-600'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent hover:shadow-sm'
                   }
                   ${isCollapsed ? 'lg:justify-center lg:px-3' : ''}
                 `}
@@ -254,9 +254,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 
                 {/* Tooltip for collapsed state */}
                 {isCollapsed && isDesktop && (
-                  <div className="hidden lg:group-hover:block absolute left-16 bg-surface-900 dark:bg-surface-100 text-surface-100 dark:text-surface-900 px-2 py-1 rounded text-xs whitespace-nowrap z-50 shadow-lg pointer-events-none">
+                  <div className="hidden lg:group-hover:block absolute left-16 bg-popover text-popover-foreground px-2 py-1 rounded text-xs whitespace-nowrap z-50 shadow-lg pointer-events-none">
                     {label}
-                    <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-surface-900 dark:bg-surface-100 rotate-45"></div>
+                    <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-popover rotate-45"></div>
                   </div>
                 )}
               </button>

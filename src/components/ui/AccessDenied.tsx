@@ -8,17 +8,17 @@ interface AccessDeniedProps {
 
 export const AccessDenied: React.FC<AccessDeniedProps> = ({ moduleName, userRole }) => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center max-w-md mx-auto px-4">
         <div className="mb-6">
           <Shield className="h-16 w-16 text-red-500 mx-auto" />
         </div>
         
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+        <h1 className="text-2xl font-bold text-foreground mb-4">
           Access Denied
         </h1>
         
-        <p className="text-gray-600 mb-6">
+        <p className="text-muted-foreground mb-6">
           You cannot have access to the <strong>{moduleName}</strong> module.
         </p>
         
@@ -37,7 +37,7 @@ export const AccessDenied: React.FC<AccessDeniedProps> = ({ moduleName, userRole
         
         <button
           onClick={() => window.history.back()}
-          className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="inline-flex items-center px-4 py-2 border border-border shadow-sm text-sm font-medium rounded-md text-card-foreground bg-card hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring"
         >
           Go Back
         </button>

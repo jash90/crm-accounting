@@ -119,7 +119,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+    <div className="bg-card rounded-lg shadow-sm border border-border hover:shadow-md transition-shadow">
       <div className="p-6">
         {/* Header - Clickable area for navigation */}
         <div
@@ -129,21 +129,21 @@ export const ClientCard: React.FC<ClientCardProps> = ({
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-3">
               <div className="flex-shrink-0">
-                <div className="h-12 w-12 bg-primary-100 rounded-full flex items-center justify-center">
+                <div className="h-12 w-12 bg-primary-50 rounded-full flex items-center justify-center">
                   <Building2 className="h-6 w-6 text-primary-600" />
                 </div>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-2">
-                  <h3 className="text-lg font-medium text-gray-900 truncate hover:text-primary-600 transition-colors">
+                  <h3 className="text-lg font-medium text-card-foreground truncate hover:text-primary-700 transition-colors">
                     {client.company_name}
                   </h3>
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-primary-800">
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-50 text-primary-700">
                     #{client.client_number}
                   </span>
                 </div>
                 {client.business_type && (
-                  <p className="text-sm text-gray-500 truncate">
+                  <p className="text-sm text-muted-foreground truncate">
                     {client.business_type}
                   </p>
                 )}
@@ -155,17 +155,17 @@ export const ClientCard: React.FC<ClientCardProps> = ({
               <div className="relative" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={() => setShowMenu(!showMenu)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   <MoreVertical className="h-5 w-5" />
                 </button>
 
                 {showMenu && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                  <div className="absolute right-0 mt-2 w-56 bg-popover rounded-md shadow-lg ring-1 ring-border/5 z-10">
                     <div className="py-1">
                       <button
                         onClick={() => navigate(`/clients/${client.id}`)}
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                        className="flex items-center px-4 py-2 text-sm text-popover-foreground hover:bg-accent w-full text-left"
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         View Details
@@ -177,7 +177,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
                             onEdit(client);
                             setShowMenu(false);
                           }}
-                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                          className="flex items-center px-4 py-2 text-sm text-popover-foreground hover:bg-accent w-full text-left"
                         >
                           <Edit className="h-4 w-4 mr-2" />
                           Edit Client
@@ -191,7 +191,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
                             handleGenerateInvoice();
                             setShowMenu(false);
                           }}
-                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                          className="flex items-center px-4 py-2 text-sm text-popover-foreground hover:bg-accent w-full text-left"
                         >
                           <Receipt className="h-4 w-4 mr-2" />
                           Generate Invoice
@@ -204,7 +204,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
                             handleManageContracts();
                             setShowMenu(false);
                           }}
-                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                          className="flex items-center px-4 py-2 text-sm text-popover-foreground hover:bg-accent w-full text-left"
                         >
                           <ScrollText className="h-4 w-4 mr-2" />
                           Manage Contracts
@@ -217,7 +217,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
                             handleAttachDocument();
                             setShowMenu(false);
                           }}
-                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                          className="flex items-center px-4 py-2 text-sm text-popover-foreground hover:bg-accent w-full text-left"
                         >
                           <Files className="h-4 w-4 mr-2" />
                           Attach Document
@@ -230,7 +230,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
                             window.location.href = `/tasks?clientId=${client.id}`;
                             setShowMenu(false);
                           }}
-                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                          className="flex items-center px-4 py-2 text-sm text-popover-foreground hover:bg-accent w-full text-left"
                         >
                           <ListTodo className="h-4 w-4 mr-2" />
                           View Tasks
@@ -241,7 +241,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
                         features.canManageContracts ||
                         features.canAttachDocuments ||
                         features.canAssignTasks) && (
-                        <div className="border-t border-gray-100 my-1"></div>
+                        <div className="border-t border-border my-1"></div>
                       )}
 
                       {canDelete && onDelete && (
@@ -250,7 +250,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
                             onDelete(client);
                             setShowMenu(false);
                           }}
-                          className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                          className="flex items-center px-4 py-2 text-sm text-destructive hover:bg-destructive/10 w-full text-left"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Delete Client
@@ -267,11 +267,11 @@ export const ClientCard: React.FC<ClientCardProps> = ({
         {/* Contact Information */}
         <div className="mt-4 space-y-2">
           {client.email && (
-            <div className="flex items-center text-sm text-gray-600">
-              <Mail className="h-4 w-4 mr-2 text-gray-400" />
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
               <a
                 href={`mailto:${client.email}`}
-                className="hover:text-blue-600"
+                className="hover:text-primary-600"
               >
                 {client.email}
               </a>
@@ -279,31 +279,31 @@ export const ClientCard: React.FC<ClientCardProps> = ({
           )}
 
           {client.phone && (
-            <div className="flex items-center text-sm text-gray-600">
-              <Phone className="h-4 w-4 mr-2 text-gray-400" />
-              <a href={`tel:${client.phone}`} className="hover:text-blue-600">
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+              <a href={`tel:${client.phone}`} className="hover:text-primary-600">
                 {client.phone}
               </a>
             </div>
           )}
 
           {client.start_date && (
-            <div className="flex items-center text-sm text-gray-600">
-              <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
               <span>Started: {formatDate(client.start_date)}</span>
             </div>
           )}
 
           {client.tax_form && (
-            <div className="flex items-center text-sm text-gray-600">
-              <DollarSign className="h-4 w-4 mr-2 text-gray-400" />
+            <div className="flex items-center text-sm text-muted-foreground">
+              <DollarSign className="h-4 w-4 mr-2 text-muted-foreground" />
               <span>{client.tax_form}</span>
             </div>
           )}
 
           {client.has_employees && (
-            <div className="flex items-center text-sm text-gray-600">
-              <Users className="h-4 w-4 mr-2 text-gray-400" />
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Users className="h-4 w-4 mr-2 text-muted-foreground" />
               <span>Has employees</span>
             </div>
           )}
@@ -345,7 +345,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
               <span className="ml-1">{client.contract_status}</span>
             </span>
             {client.aml_group && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
                 AML: {client.aml_group}
               </span>
             )}
@@ -353,8 +353,8 @@ export const ClientCard: React.FC<ClientCardProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="text-xs text-gray-500 flex justify-between">
+        <div className="mt-4 pt-4 border-t border-border">
+          <div className="text-xs text-muted-foreground flex justify-between">
             <span>Created {formatDate(client.created_at)}</span>
             {client.service_provider && (
               <span>Service: {client.service_provider}</span>

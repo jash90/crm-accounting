@@ -60,7 +60,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ column, tasks }) => 
         ref={setNodeRef}
         className={`rounded-lg p-4 h-full transition-all duration-200 ${
           isOver && isDraggedTaskFromDifferentColumn 
-            ? 'ring-2 ring-blue-500 ring-opacity-75 bg-blue-50 dark:bg-blue-900/30 scale-[1.02] shadow-lg' 
+            ? 'ring-2 ring-blue-500/75 bg-blue-50 dark:bg-blue-900/30 scale-[1.02] shadow-lg' 
             : isOver 
             ? 'ring-1 ring-gray-300 bg-gray-50 dark:bg-gray-800/50'
             : ''
@@ -75,7 +75,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ column, tasks }) => 
             )}
           </h3>
           <div className="flex items-center space-x-2">
-            <span className="bg-white bg-opacity-70 rounded-full px-2 py-1 text-xs font-medium text-gray-700">
+            <span className="bg-white/70 rounded-full px-2 py-1 text-xs font-medium text-gray-700">
               {tasks.length}
             </span>
             {overdueCount > 0 && (
@@ -161,13 +161,13 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ column, tasks }) => 
 
         {/* Quick Add Button for Todo Column */}
         {column.id === 'todo' && (
-          <div className="mt-4 pt-4 border-t border-gray-200 border-opacity-50">
+          <div className="mt-4 pt-4 border-t border-gray-200/50">
             <button
               onClick={() => {
                 // This could open a quick task creation modal
                 window.location.href = '/tasks/new';
               }}
-              className="w-full bg-white bg-opacity-50 hover:bg-opacity-70 border-2 border-dashed border-gray-300 rounded-lg p-3 text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200 flex items-center justify-center"
+              className="w-full bg-white/50 hover:bg-white/70 border-2 border-dashed border-gray-300 rounded-lg p-3 text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200 flex items-center justify-center"
             >
               <span className="text-lg mr-2">+</span>
               Add new task

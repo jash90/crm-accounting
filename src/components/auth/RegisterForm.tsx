@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth';
 import { toast } from 'react-toastify';
 import { Eye, EyeOff, Building2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ButtonLoading } from '@/components/shared/loading-spinner';
 
 export const RegisterForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -48,38 +52,32 @@ export const RegisterForm: React.FC = () => {
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div>
-        <label
-          htmlFor="company-name"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <Label htmlFor="company-name">
           Company Name
-        </label>
+        </Label>
         <div className="mt-1 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Building2 className="h-4 w-4 text-gray-400" />
+            <Building2 className="h-4 w-4 text-muted-foreground" />
           </div>
-          <input
+          <Input
             id="company-name"
             name="companyName"
             type="text"
             required
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
-            className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+            className="pl-10"
             placeholder="Enter your company name"
           />
         </div>
       </div>
 
       <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <Label htmlFor="email">
           Email address
-        </label>
+        </Label>
         <div className="mt-1">
-          <input
+          <Input
             id="email"
             name="email"
             type="email"
@@ -87,21 +85,17 @@ export const RegisterForm: React.FC = () => {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             placeholder="Enter your email"
           />
         </div>
       </div>
 
       <div>
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <Label htmlFor="password">
           Password
-        </label>
+        </Label>
         <div className="mt-1 relative">
-          <input
+          <Input
             id="password"
             name="password"
             type={showPassword ? 'text' : 'password'}
@@ -109,35 +103,32 @@ export const RegisterForm: React.FC = () => {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            className="pr-10"
             placeholder="Create a password"
           />
           <button
             type="button"
-            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground"
             onClick={() => setShowPassword(!showPassword)}
           >
             {showPassword ? (
-              <EyeOff className="h-4 w-4 text-gray-400" />
+              <EyeOff className="h-4 w-4" />
             ) : (
-              <Eye className="h-4 w-4 text-gray-400" />
+              <Eye className="h-4 w-4" />
             )}
           </button>
         </div>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           Must be at least 8 characters long
         </p>
       </div>
 
       <div>
-        <label
-          htmlFor="confirm-password"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <Label htmlFor="confirm-password">
           Confirm Password
-        </label>
+        </Label>
         <div className="mt-1 relative">
-          <input
+          <Input
             id="confirm-password"
             name="confirmPassword"
             type={showConfirmPassword ? 'text' : 'password'}
@@ -145,34 +136,41 @@ export const RegisterForm: React.FC = () => {
             required
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            className="pr-10"
             placeholder="Confirm your password"
           />
           <button
             type="button"
-            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
           >
             {showConfirmPassword ? (
-              <EyeOff className="h-4 w-4 text-gray-400" />
+              <EyeOff className="h-4 w-4" />
             ) : (
-              <Eye className="h-4 w-4 text-gray-400" />
+              <Eye className="h-4 w-4" />
             )}
           </button>
         </div>
       </div>
 
       <div>
-        <button
+        <Button
           type="submit"
           disabled={loading}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full"
         >
-          {loading ? 'Creating account...' : 'Create account'}
-        </button>
+          {loading ? (
+            <>
+              <ButtonLoading />
+              <span className="ml-2">Creating account...</span>
+            </>
+          ) : (
+            'Create account'
+          )}
+        </Button>
       </div>
 
-      <div className="text-xs text-gray-500">
+      <div className="text-xs text-muted-foreground">
         <p>
           By creating an account, you agree to our Terms of Service and Privacy
           Policy. You will be the owner of your company account and can invite

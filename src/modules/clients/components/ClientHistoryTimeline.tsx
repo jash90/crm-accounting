@@ -234,7 +234,7 @@ export const ClientHistoryTimeline: React.FC<ClientHistoryTimelineProps> = ({
         </button>
 
         {isExpanded && (
-          <div className="mt-2 p-3 bg-white bg-opacity-50 rounded border text-xs">
+          <div className="mt-2 p-3 bg-white/50 rounded border text-xs">
             {activity.changed_fields && activity.changed_fields.length > 0 && (
               <div className="mb-2">
                 <span className="font-medium text-gray-700">

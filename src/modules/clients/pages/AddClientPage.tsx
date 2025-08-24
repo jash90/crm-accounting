@@ -179,7 +179,7 @@ export const AddClientPage: React.FC = () => {
       <div className="flex items-center space-x-4">
         <button
           onClick={() => navigate('/clients')}
-          className="inline-flex items-center p-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="inline-flex items-center p-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-card hover:bg-background focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -195,7 +195,7 @@ export const AddClientPage: React.FC = () => {
       </div>
 
       {/* Form */}
-      <div className="bg-white shadow rounded-lg">
+      <div className="bg-card shadow rounded-lg">
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
           {/* Basic Information */}
           <div className="space-y-4">
@@ -323,7 +323,7 @@ export const AddClientPage: React.FC = () => {
                       type="checkbox"
                       checked={gtuCodes.includes(code)}
                       onChange={() => handleToggleGtuCode(code)}
-                      className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                      className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200/50"
                     />
                     <span className="ml-2 text-sm text-gray-700">{code}</span>
                   </label>
@@ -338,7 +338,7 @@ export const AddClientPage: React.FC = () => {
                   type="checkbox"
                   checked={vatEuRegistration}
                   onChange={(e) => setVatEuRegistration(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200/50"
                 />
                 <span className="ml-2 text-sm text-gray-700">VAT-EU Registration</span>
               </label>
@@ -348,7 +348,7 @@ export const AddClientPage: React.FC = () => {
                   type="checkbox"
                   checked={laborFund}
                   onChange={(e) => setLaborFund(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200/50"
                 />
                 <span className="ml-2 text-sm text-gray-700">Labor Fund</span>
               </label>
@@ -358,7 +358,7 @@ export const AddClientPage: React.FC = () => {
                   type="checkbox"
                   checked={zusStartupRelief}
                   onChange={(e) => setZusStartupRelief(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200/50"
                 />
                 <span className="ml-2 text-sm text-gray-700">ZUS Startup Relief</span>
               </label>
@@ -368,7 +368,7 @@ export const AddClientPage: React.FC = () => {
                   type="checkbox"
                   checked={freeAmount2022}
                   onChange={(e) => setFreeAmount2022(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200/50"
                 />
                 <span className="ml-2 text-sm text-gray-700">Free Amount 2022 Calculated</span>
               </label>
@@ -569,7 +569,7 @@ export const AddClientPage: React.FC = () => {
                   type="checkbox"
                   checked={eSzokSystem}
                   onChange={(e) => setESzokSystem(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200/50"
                 />
                 <span className="ml-2 text-sm text-gray-700">e-SZOK System</span>
               </label>
@@ -579,7 +579,7 @@ export const AddClientPage: React.FC = () => {
                   type="checkbox"
                   checked={hasEmployees}
                   onChange={(e) => setHasEmployees(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200/50"
                 />
                 <span className="ml-2 text-sm text-gray-700">Has Employees</span>
               </label>
@@ -609,7 +609,7 @@ export const AddClientPage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/clients')}
-              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-card hover:bg-background focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Cancel
             </button>

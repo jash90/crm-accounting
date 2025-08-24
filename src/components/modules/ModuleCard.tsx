@@ -5,6 +5,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useModules } from '@/hooks/useModules';
 import { Package, MoreVertical, Edit, Trash2, Eye, EyeOff, Power, PowerOff } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { Card } from '@/components/ui/card';
+import { StatusBadge } from '@/components/ui/status-badge';
 
 interface ModuleCardProps {
   module: Module & { company_modules?: Array<{ is_enabled: boolean }> };
@@ -65,39 +67,39 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
   const getStatusBadge = () => {
     if (user?.role === 'SUPERADMIN') {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+        <StatusBadge variant="info">
           <Package className="h-3 w-3 mr-1" />
           Global Module
-        </span>
+        </StatusBadge>
       );
     }
 
     if (isEnabled) {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+        <StatusBadge variant="success">
           <Power className="h-3 w-3 mr-1" />
           Enabled
-        </span>
+        </StatusBadge>
       );
     } else {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+        <StatusBadge variant="neutral">
           <PowerOff className="h-3 w-3 mr-1" />
           Disabled
-        </span>
+        </StatusBadge>
       );
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+    <Card className="p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-3">
           <div className="flex-shrink-0">
-            <Package className="h-8 w-8 text-blue-600" />
+            <Package className="h-8 w-8 text-primary-600" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-medium text-gray-900 truncate">
+            <h3 className="text-lg font-medium text-card-foreground truncate">
               {module.name}
             </h3>
           </div>
@@ -107,13 +109,13 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
           <div className="relative">
             <button 
               onClick={() => setShowMenu(!showMenu)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-muted-foreground hover:text-foreground"
             >
               <MoreVertical className="h-5 w-5" />
             </button>
             
             {showMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+              <div className="absolute right-0 mt-2 w-48 bg-popover rounded-md shadow-lg ring-1 ring-border/5 z-10">
                 <div className="py-1">
                   {canEdit && onEdit && (
                     <button
@@ -121,7 +123,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
                         onEdit(module);
                         setShowMenu(false);
                       }}
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                      className="flex items-center px-4 py-2 text-sm text-popover-foreground hover:bg-accent w-full text-left"
                     >
                       <Edit className="h-4 w-4 mr-2" />
                       Edit Module
@@ -133,7 +135,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
                         handleToggleEnablement();
                         setShowMenu(false);
                       }}
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                      className="flex items-center px-4 py-2 text-sm text-popover-foreground hover:bg-accent w-full text-left"
                     >
                       {isEnabled ? (
                         <>
@@ -154,7 +156,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
                         onDelete(module);
                         setShowMenu(false);
                       }}
-                      className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                      className="flex items-center px-4 py-2 text-sm text-destructive hover:bg-destructive/10 w-full text-left"
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete Module
@@ -167,7 +169,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
         )}
       </div>
 
-      <p className="mt-3 text-sm text-gray-600 line-clamp-3">
+      <p className="mt-3 text-sm text-muted-foreground line-clamp-3">
         {module.description || 'No description available'}
       </p>
 
@@ -176,7 +178,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
         <div className="mt-3">
           <button
             onClick={handleModuleClick}
-            className="inline-flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+            className="inline-flex items-center space-x-1 text-sm text-primary-600 hover:text-primary-700 transition-colors"
           >
             <Package className="h-4 w-4" />
             <span>Open Module</span>
@@ -189,7 +191,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
           {getStatusBadge()}
         </div>
         
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-muted-foreground">
           {new Date(module.created_at).toLocaleDateString()}
         </div>
       </div>
@@ -201,6 +203,6 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
           onClick={() => setShowMenu(false)}
         />
       )}
-    </div>
+    </Card>
   );
 };

@@ -8,6 +8,14 @@ import { AccessDenied } from '@/components/ui/AccessDenied';
 import { Building2, Plus, Search, Filter } from 'lucide-react';
 import { toast } from 'react-toastify';
 import type { Client } from '@/types/supabase';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { FinanceCard } from '@/components/ui/finance-card';
+import { PageHeader } from '@/components/shared/page-header';
+import { LoadingSpinner, PageLoading } from '@/components/shared/loading-spinner';
+import { EmptyState } from '@/components/shared/empty-state';
+import { StatusBadge } from '@/components/ui/status-badge';
 
 export const ClientsPage: React.FC = () => {
   const { user } = useAuthStore();
@@ -29,14 +37,7 @@ export const ClientsPage: React.FC = () => {
 
   // Show loading while checking module access
   if (modulesLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-2 text-surface-600 dark:text-surface-400">Loading...</p>
-        </div>
-      </div>
-    );
+    return <PageLoading message="Loading clients module..." />;
   }
 
   // Show access denied if user doesn't have access to clients module
@@ -96,37 +97,30 @@ export const ClientsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Clients</h1>
-          <p className="mt-2 text-gray-600">
-            Manage your accounting and bookkeeping clients
-          </p>
-        </div>
-
-        <button
-          onClick={() => navigate('/clients/add')}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-        >
+      <PageHeader
+        title="Clients"
+        description="Manage your accounting and bookkeeping clients"
+      >
+        <Button onClick={() => navigate('/clients/add')}>
           <Plus className="h-4 w-4 mr-2" />
           Add Client
-        </button>
-      </div>
+        </Button>
+      </PageHeader>
 
       {/* Search and Filters */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <Card className="p-6">
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
           <div className="flex-1">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400" />
+                <Search className="h-4 w-4 text-muted-foreground" />
               </div>
-              <input
+              <Input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-primary-500 sm:text-sm"
+                className="pl-10"
                 placeholder="Search clients, companies, business types..."
               />
             </div>
@@ -136,12 +130,12 @@ export const ClientsPage: React.FC = () => {
           <div className="sm:w-48">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Filter className="h-4 w-4 text-gray-400" />
+                <Filter className="h-4 w-4 text-muted-foreground" />
               </div>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="block w-full pl-10 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                className="block w-full pl-10 pr-10 py-2 text-base border border-input focus:outline-none focus:ring-ring focus:border-ring sm:text-sm rounded-md bg-background"
               >
                 {getStatusOptions().map((option) => (
                   <option key={option.value} value={option.value}>
@@ -157,204 +151,109 @@ export const ClientsPage: React.FC = () => {
         {(searchTerm || statusFilter !== 'all') && (
           <div className="mt-4 flex flex-wrap gap-2">
             {searchTerm && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+              <StatusBadge variant="info">
                 Search: "{searchTerm}"
                 <button
                   onClick={() => setSearchTerm('')}
-                  className="ml-2 text-primary-600 hover:text-blue-800"
+                  className="ml-2 hover:opacity-70"
                 >
                   ×
                 </button>
-              </span>
+              </StatusBadge>
             )}
             {statusFilter !== 'all' && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <StatusBadge variant="success">
                 Status: {statusFilter}
                 <button
                   onClick={() => setStatusFilter('all')}
-                  className="ml-2 text-green-600 hover:text-green-800"
+                  className="ml-2 hover:opacity-70"
                 >
                   ×
                 </button>
-              </span>
+              </StatusBadge>
             )}
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Statistics */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-4">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <Building2 className="h-6 w-6 text-gray-400" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Total Clients
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {clients.length}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="h-6 w-6 bg-green-100 rounded-full flex items-center justify-center">
-                  <div className="h-3 w-3 bg-green-600 rounded-full"></div>
-                </div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Signed Contracts
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {
-                      clients.filter(
-                        (c) =>
-                          c.contract_status === 'Signed' ||
-                          c.contract_status === 'Podpisana'
-                      ).length
-                    }
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="h-6 w-6 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <div className="h-3 w-3 bg-yellow-600 rounded-full"></div>
-                </div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Pending
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {
-                      clients.filter(
-                        (c) =>
-                          c.contract_status === 'Pending' ||
-                          c.contract_status === 'W trakcie'
-                      ).length
-                    }
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="h-6 w-6 bg-blue-100 rounded-full flex items-center justify-center">
-                  <div className="h-3 w-3 bg-blue-600 rounded-full"></div>
-                </div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Using e-SZOK
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {clients.filter((c) => c.e_szok_system).length}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
+        <FinanceCard
+          title="Total Clients"
+          value={clients.length.toString()}
+          icon={<Building2 className="h-6 w-6" />}
+          trend="neutral"
+        />
+        
+        <FinanceCard
+          title="Signed Contracts"
+          value={clients.filter((c) => 
+            c.contract_status === 'Signed' || c.contract_status === 'Podpisana'
+          ).length.toString()}
+          trend="up"
+          description="Active contracts"
+        />
+        
+        <FinanceCard
+          title="Pending"
+          value={clients.filter((c) => 
+            c.contract_status === 'Pending' || c.contract_status === 'W trakcie'
+          ).length.toString()}
+          trend="neutral"
+          description="Contracts in progress"
+        />
+        
+        <FinanceCard
+          title="Using e-SZOK"
+          value={clients.filter((c) => c.e_szok_system).length.toString()}
+          trend="neutral"
+          description="Digital system users"
+        />
       </div>
 
       {/* Clients Grid */}
       {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading clients...</p>
-        </div>
+        <LoadingSpinner size="lg" text="Loading clients..." className="py-12" />
       ) : filteredClients.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-8">
-            <Building2 className="h-16 w-16 text-gray-400 mx-auto" />
-            <h3 className="mt-4 text-lg font-medium text-gray-900">
-              {clients.length === 0
-                ? 'Welcome to Client Management'
+        <Card>
+          <CardContent className="p-8">
+            <EmptyState
+              icon={<Building2 className="h-16 w-16" />}
+              title={clients.length === 0 
+                ? 'Welcome to Client Management' 
                 : 'No matching clients found'}
-            </h3>
-            <p className="mt-2 text-sm text-gray-500 max-w-md mx-auto">
-              {clients.length === 0
+              description={clients.length === 0
                 ? 'Start managing your accounting clients efficiently. Add your first client to track contracts, tax forms, and business details.'
                 : searchTerm
                   ? `No clients match "${searchTerm}". Try different search terms or check the spelling.`
                   : statusFilter !== 'all'
                     ? `No clients with status "${statusFilter}". Try a different status filter.`
                     : 'Try adjusting your search or filters to find clients.'}
-            </p>
-            {clients.length === 0 ? (
-              <div className="mt-8 space-y-4">
-                <button
-                  onClick={() => navigate('/clients/add')}
-                  className="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                >
-                  <Plus className="h-5 w-5 mr-2" />
-                  Add Your First Client
-                </button>
-                <div className="text-sm text-gray-500">
-                  <p>Quick tips to get started:</p>
-                  <ul className="mt-2 space-y-1 text-left max-w-sm mx-auto">
-                    <li>• Add basic company information</li>
-                    <li>• Set up tax and VAT configurations</li>
-                    <li>• Track contract status</li>
-                    <li>• Manage multiple contacts per client</li>
-                  </ul>
-                </div>
-              </div>
-            ) : (
+              action={clients.length === 0 ? {
+                label: 'Add Your First Client',
+                onClick: () => navigate('/clients/add')
+              } : undefined}
+            />
+            {clients.length > 0 && (
               <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
                 {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm('')}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
+                  <Button variant="outline" onClick={() => setSearchTerm('')}>
                     Clear Search
-                  </button>
+                  </Button>
                 )}
                 {statusFilter !== 'all' && (
-                  <button
-                    onClick={() => setStatusFilter('all')}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
+                  <Button variant="outline" onClick={() => setStatusFilter('all')}>
                     Clear Filters
-                  </button>
+                  </Button>
                 )}
-                <button
-                  onClick={() => navigate('/clients/add')}
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
+                <Button onClick={() => navigate('/clients/add')}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add New Client
-                </button>
+                </Button>
               </div>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredClients.map((client) => (
