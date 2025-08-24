@@ -32,3 +32,4 @@ playwright-report/
 # Coverage
 coverage/
 .env
+.aider*

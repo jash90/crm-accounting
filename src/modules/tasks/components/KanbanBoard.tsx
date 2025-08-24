@@ -1,31 +1,37 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   DndContext,
   DragEndEvent,
   DragOverEvent,
-  DragOverlay,
   DragStartEvent,
-  MouseSensor,
-  TouchSensor,
+  DragOverlay,
+  closestCorners,
+  KeyboardSensor,
+  PointerSensor,
   useSensor,
   useSensors,
-  closestCenter,
-  pointerWithin,
-  rectIntersection,
-  getFirstCollision,
-  CollisionDetection,
 } from '@dnd-kit/core';
 import {
+  arrayMove,
   SortableContext,
+  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import { toast } from 'react-toastify';
 import { KanbanColumn } from './KanbanColumn';
-import { TaskDragOverlay } from './TaskDragOverlay';
+import { KanbanTaskCard } from './KanbanTaskCard';
 import { useTasks } from '../hooks/useTasks';
 import type { Task, BoardColumn } from '../types';
-import { DEFAULT_BOARD_COLUMNS } from '../types';
-import { toast } from 'react-toastify';
-import { logDragDropDiagnostics, validateDragDrop } from '../utils/dragDropDiagnostics';
+
+// Column configuration with WIP limits
+const COLUMNS = [
+  { id: 'backlog', title: 'Backlog', color: 'bg-gray-50', limit: null },
+  { id: 'todo', title: 'To Do', color: 'bg-blue-50', limit: null },
+  { id: 'in-progress', title: 'In Progress', color: 'bg-yellow-50', limit: 3 },
+  { id: 'review', title: 'Review', color: 'bg-purple-50', limit: 2 },
+  { id: 'completed', title: 'Completed', color: 'bg-green-50', limit: null },
+  { id: 'cancelled', title: 'Cancelled', color: 'bg-red-50', limit: null },
+] as const;
 
 interface KanbanBoardProps {
   tasks: Task[];
@@ -33,282 +39,263 @@ interface KanbanBoardProps {
 }
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
-  tasks,
+  tasks: initialTasks,
   loading = false,
 }) => {
   const { updateTaskStatus } = useTasks();
-  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
+  // Update local tasks when props change
+  React.useEffect(() => {
+    setTasks(initialTasks);
+  }, [initialTasks]);
+
+  // Configure sensors for drag and drop
   const sensors = useSensors(
-    useSensor(MouseSensor, {
+    useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 3, // Lower threshold for better responsiveness
+        distance: 8, // 8px movement required to start drag
       },
     }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 150,
-        tolerance: 8,
-      },
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
-  // Custom collision detection that prioritizes columns over tasks
-  const customCollisionDetection: CollisionDetection = useCallback((args) => {
-    // First, get all collisions
-    const pointerCollisions = pointerWithin(args);
-    const rectCollisions = rectIntersection(args);
-    
-    // Combine and prioritize column collisions
-    const allCollisions = [...pointerCollisions, ...rectCollisions];
-    
-    // Filter for column collisions first
-    const columnCollisions = allCollisions.filter(collision => {
-      const data = args.droppableContainers.get(collision.id)?.data.current;
-      return data?.type === 'column';
-    });
-    
-    // If we have column collisions, return the first one
-    if (columnCollisions.length > 0) {
-      return [columnCollisions[0]];
-    }
-    
-    // Otherwise, return task collisions
-    const taskCollisions = allCollisions.filter(collision => {
-      const data = args.droppableContainers.get(collision.id)?.data.current;
-      return data?.type === 'task';
-    });
-    
-    return taskCollisions.length > 0 ? [taskCollisions[0]] : [];
-  }, []);
-
-  // Group tasks by board column
+  // Group tasks by column
   const tasksByColumn = useMemo(() => {
     const grouped: Record<string, Task[]> = {};
-    
-    DEFAULT_BOARD_COLUMNS.forEach(column => {
+
+    COLUMNS.forEach((column) => {
       grouped[column.id] = [];
     });
 
-    tasks.forEach(task => {
-      const column = task.board_column || 'todo';
-      if (!grouped[column]) {
-        grouped[column] = [];
+    tasks.forEach((task) => {
+      const columnId = task.board_column || 'todo';
+      if (!grouped[columnId]) {
+        grouped[columnId] = [];
       }
-      grouped[column].push(task);
+      grouped[columnId].push(task);
     });
 
-    // Sort tasks within each column by board_order, then by due_date
-    Object.keys(grouped).forEach(columnId => {
-      grouped[columnId].sort((a, b) => {
-        // First sort by board_order
-        if (a.board_order !== b.board_order) {
-          return a.board_order - b.board_order;
-        }
-        // Then by due_date (overdue first)
-        if (a.due_date && b.due_date) {
-          return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-        }
-        if (a.due_date && !b.due_date) return -1;
-        if (!a.due_date && b.due_date) return 1;
-        // Finally by created_at (newest first)
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      });
+    // Sort tasks within each column by board_order
+    Object.keys(grouped).forEach((columnId) => {
+      grouped[columnId].sort((a, b) => a.board_order - b.board_order);
     });
 
     return grouped;
   }, [tasks]);
 
-  // Debug task distribution (only in development)
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('📊 KanbanBoard: Tasks prop updated', {
-        taskCount: tasks.length,
-        taskIds: tasks.map(t => t.id),
-        statusDistribution: tasks.reduce((acc, task) => {
-          acc[task.status] = (acc[task.status] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>),
-        columnDistribution: tasks.reduce((acc, task) => {
-          const column = task.board_column || 'undefined';
-          acc[column] = (acc[column] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>)
-      });
-      if (tasks.length > 0) {
-        logDragDropDiagnostics(tasks);
-      }
-    }
-  }, [tasks]);
+  // Get all task IDs for each column (needed for sortable context)
+  const getColumnTaskIds = useCallback(
+    (columnId: string) => {
+      return tasksByColumn[columnId]?.map((task) => task.id) || [];
+    },
+    [tasksByColumn]
+  );
 
+  // Find the container (column) for a given task ID
+  const findContainer = useCallback(
+    (id: string) => {
+      if (COLUMNS.find((col) => col.id === id)) {
+        return id; // It's a column ID
+      }
+
+      // It's a task ID, find which column it belongs to
+      const columnId = Object.keys(tasksByColumn).find((key) =>
+        tasksByColumn[key].some((task) => task.id === id)
+      );
+
+      return columnId || null;
+    },
+    [tasksByColumn]
+  );
+
+  // Get active task
+  const activeTask = useMemo(
+    () => tasks.find((task) => task.id === activeId) || null,
+    [tasks, activeId]
+  );
+
+  // Handle drag start
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
-    const task = tasks.find(t => t.id === active.id);
-    
-    if (task) {
-      console.log('🚀 Drag Start:', { 
-        taskId: task.id, 
-        title: task.title, 
-        currentColumn: task.board_column,
-        currentStatus: task.status 
-      });
-      setActiveTask(task);
-    } else {
-      console.warn('❌ Task not found for drag start:', active.id);
-      setActiveTask(null);
-    }
-  }, [tasks]);
-
-  const handleDragOver = useCallback((event: DragOverEvent) => {
-    const { active, over } = event;
-    
-    if (!over) return;
-    
-    const overData = over.data?.current;
-    const activeTask = tasks.find(t => t.id === active.id);
-    
-    if (!activeTask) return;
-    
-    // Determine target column
-    let targetColumn: string | null = null;
-    
-    if (overData?.type === 'column') {
-      targetColumn = overData.columnId;
-    } else if (overData?.type === 'task') {
-      const targetTask = tasks.find(t => t.id === over.id);
-      targetColumn = targetTask?.board_column || null;
-    }
-    
-    // Log drag over for debugging
-    console.log('🎯 Drag Over:', { 
-      activeId: active.id, 
-      overId: over.id,
-      overType: overData?.type,
-      currentColumn: activeTask.board_column,
-      targetColumn,
-      wouldMove: targetColumn && targetColumn !== activeTask.board_column
-    });
-  }, [tasks]);
-
-  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveTask(null);
-
-    if (!over) {
-      console.log('❌ No drop target found');
-      return;
-    }
-
-    const taskId = active.id as string;
-    const task = tasks.find(t => t.id === taskId);
-    
-    if (!task) {
-      console.error('❌ Task not found:', taskId);
-      return;
-    }
-
-    // Determine target column with improved logic
-    let targetColumn: string | null = null;
-    const overData = over.data?.current;
-    
-    if (overData?.type === 'column') {
-      // Dropped directly on a column
-      targetColumn = overData.columnId;
-      console.log('🎯 Dropped on column:', targetColumn);
-    } else if (overData?.type === 'task') {
-      // Dropped on a task - use that task's column
-      const targetTask = tasks.find(t => t.id === over.id);
-      if (targetTask) {
-        targetColumn = targetTask.board_column;
-        console.log('🎯 Dropped on task in column:', targetColumn);
-      }
-    } else {
-      // Fallback: check if overId matches a column directly
-      const columnMatch = DEFAULT_BOARD_COLUMNS.find(col => col.id === over.id);
-      if (columnMatch) {
-        targetColumn = columnMatch.id;
-        console.log('🎯 Fallback: Dropped on column:', targetColumn);
-      }
-    }
-
-    if (!targetColumn) {
-      console.error('❌ Could not determine target column', {
-        overId: over.id,
-        overData,
-        availableColumns: DEFAULT_BOARD_COLUMNS.map(c => c.id)
-      });
-      return;
-    }
-
-    // Validate target column
-    const isValidColumn = DEFAULT_BOARD_COLUMNS.some(col => col.id === targetColumn);
-    if (!isValidColumn) {
-      console.error('❌ Invalid target column:', targetColumn);
-      return;
-    }
-
-    const newStatus = mapColumnToStatus(targetColumn);
-    const newColumn = targetColumn as BoardColumn;
-
-    console.log('🔄 Drag operation:', {
-      taskId: task.id,
-      title: task.title,
-      from: `${task.board_column}/${task.status}`,
-      to: `${newColumn}/${newStatus}`,
-      changed: newColumn !== task.board_column || newStatus !== task.status
-    });
-
-    // Only update if something actually changed
-    if (newColumn !== task.board_column || newStatus !== task.status) {
-      try {
-        console.log('💾 Updating task status...');
-        await updateTaskStatus(taskId, newStatus, newColumn);
-        console.log('✅ Task status updated successfully');
-        
-        const columnTitle = DEFAULT_BOARD_COLUMNS.find(c => c.id === newColumn)?.title || newColumn;
-        toast.success(`Task moved to ${columnTitle}`);
-      } catch (error) {
-        console.error('❌ Failed to update task status:', error);
-        toast.error('Failed to move task. Please try again.');
-      }
-    } else {
-      console.log('📌 No change needed - task already in target column');
-    }
-  }, [tasks, updateTaskStatus, mapColumnToStatus]);
-
-  const mapColumnToStatus = useCallback((column: string): string => {
-    const statusMap: Record<string, string> = {
-      'backlog': 'todo',
-      'todo': 'todo',
-      'in-progress': 'in-progress',
-      'review': 'review',
-      'completed': 'completed',
-      'cancelled': 'cancelled'
-    };
-    
-    const mappedStatus = statusMap[column] || 'todo';
-    return mappedStatus;
+    setActiveId(active.id as string);
   }, []);
+
+  // Handle drag over (for live sorting preview)
+  const handleDragOver = useCallback(
+    (event: DragOverEvent) => {
+      const { active, over } = event;
+
+      if (!over) return;
+
+      const activeContainer = findContainer(active.id as string);
+      const overContainer = findContainer(over.id as string);
+
+      if (
+        !activeContainer ||
+        !overContainer ||
+        activeContainer === overContainer
+      ) {
+        return;
+      }
+
+      setTasks((prevTasks) => {
+        const activeTask = prevTasks.find((t) => t.id === active.id);
+        if (!activeTask) return prevTasks;
+
+        // Check WIP limit for target column
+        const targetColumn = COLUMNS.find((col) => col.id === overContainer);
+        if (targetColumn?.limit) {
+          const targetTasks = prevTasks.filter(
+            (t) => t.board_column === overContainer
+          );
+          if (targetTasks.length >= targetColumn.limit) {
+            return prevTasks; // Don't move if limit reached
+          }
+        }
+
+        // Move task to new column
+        return prevTasks.map((task) => {
+          if (task.id === active.id) {
+            return {
+              ...task,
+              board_column: overContainer as BoardColumn,
+              status: mapColumnToStatus(overContainer),
+            };
+          }
+          return task;
+        });
+      });
+    },
+    [findContainer]
+  );
+
+  // Handle drag end
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event;
+
+      setActiveId(null);
+
+      if (!over) return;
+
+      const activeContainer = findContainer(active.id as string);
+      const overContainer = findContainer(over.id as string);
+
+      if (!activeContainer || !overContainer) return;
+
+      const activeTask = tasks.find((t) => t.id === active.id);
+      if (!activeTask) return;
+
+      // Moving to a different column
+      if (activeContainer !== overContainer) {
+        // Check WIP limit
+        const targetColumn = COLUMNS.find((col) => col.id === overContainer);
+        if (targetColumn?.limit) {
+          const targetTasks = tasks.filter(
+            (t) => t.board_column === overContainer
+          );
+          if (targetTasks.length >= targetColumn.limit) {
+            toast.warning(
+              `${targetColumn.title} column is at its limit (${targetColumn.limit} tasks)`
+            );
+            // Reset local state
+            setTasks(initialTasks);
+            return;
+          }
+        }
+
+        const newStatus = mapColumnToStatus(overContainer);
+
+        try {
+          await updateTaskStatus(
+            active.id as string,
+            newStatus,
+            overContainer as BoardColumn
+          );
+          toast.success(
+            `Task moved to ${targetColumn?.title || overContainer}`
+          );
+        } catch (error) {
+          console.error('Failed to update task:', error);
+          toast.error('Failed to move task');
+          // Reset local state on error
+          setTasks(initialTasks);
+        }
+      }
+      // Reordering within the same column
+      else {
+        const columnTasks = tasksByColumn[activeContainer];
+        const activeIndex = columnTasks.findIndex((t) => t.id === active.id);
+        const overIndex = columnTasks.findIndex((t) => t.id === over.id);
+
+        if (activeIndex !== overIndex) {
+          const reorderedTasks = arrayMove(columnTasks, activeIndex, overIndex);
+
+          // Update board_order for all affected tasks
+          const updates = reorderedTasks.map((task, index) => ({
+            ...task,
+            board_order: index,
+          }));
+
+          // Update local state
+          setTasks((prevTasks) => {
+            const otherTasks = prevTasks.filter(
+              (t) => t.board_column !== activeContainer
+            );
+            return [...otherTasks, ...updates];
+          });
+
+          // Here you would typically update the board_order in the database
+          // For now, just update the status to trigger a refresh
+          try {
+            await updateTaskStatus(
+              active.id as string,
+              activeTask.status,
+              activeContainer as BoardColumn
+            );
+          } catch (error) {
+            console.error('Failed to reorder task:', error);
+            setTasks(initialTasks);
+          }
+        }
+      }
+    },
+    [tasks, tasksByColumn, findContainer, updateTaskStatus, initialTasks]
+  );
+
+  // Map column to status
+  const mapColumnToStatus = (columnId: string): string => {
+    const statusMap: Record<string, string> = {
+      backlog: 'todo',
+      todo: 'todo',
+      'in-progress': 'in-progress',
+      review: 'review',
+      completed: 'completed',
+      cancelled: 'cancelled',
+    };
+    return statusMap[columnId] || 'todo';
+  };
 
   if (loading) {
     return (
-      <div className="flex space-x-6 h-full overflow-x-auto pb-6">
-        {DEFAULT_BOARD_COLUMNS.map(column => (
+      <div className="flex gap-4 overflow-x-auto pb-4">
+        {COLUMNS.map((column) => (
           <div key={column.id} className="flex-shrink-0 w-80">
-            <div className={`rounded-lg p-4 h-full ${column.color}`}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-900">{column.title}</h3>
-                <div className="bg-gray-200 rounded-full px-2 py-1 text-xs animate-pulse">
-                  <div className="w-4 h-3 bg-gray-300 rounded"></div>
+            <div className={`${column.color} rounded-lg p-4 h-[600px]`}>
+              <div className="animate-pulse">
+                <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="bg-white rounded-lg p-4">
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-              <div className="space-y-3">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-lg p-4 shadow-sm animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                ))}
               </div>
             </div>
           </div>
@@ -320,13 +307,13 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={customCollisionDetection}
+      collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex space-x-6 h-full overflow-x-auto pb-6">
-        {DEFAULT_BOARD_COLUMNS.map(column => (
+      <div className="flex gap-4 overflow-x-auto pb-4 kanban-board">
+        {COLUMNS.map((column) => (
           <KanbanColumn
             key={column.id}
             column={column}
@@ -335,8 +322,12 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
         ))}
       </div>
 
-      <DragOverlay dropAnimation={null}>
-        {activeTask ? <TaskDragOverlay task={activeTask} /> : null}
+      <DragOverlay>
+        {activeTask ? (
+          <div className="rotate-3 opacity-90">
+            <KanbanTaskCard task={activeTask} isDragging />
+          </div>
+        ) : null}
       </DragOverlay>
     </DndContext>
   );

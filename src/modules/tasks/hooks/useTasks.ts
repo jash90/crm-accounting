@@ -14,7 +14,6 @@ import type {
   TaskSearchResult,
 } from '../types';
 import { sanitizeTaskData } from '../utils/taskDataSanitizer';
-import { applyOptimisticUpdate, createRollbackTask } from '../utils/optimisticUpdates';
 
 export const useTasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -89,7 +88,7 @@ export const useTasks = () => {
         if (error) throw error;
 
         // Process assignment data and enrich with client data if available
-        let enrichedTasks = (data || []).map(task => ({
+        let enrichedTasks = (data || []).map((task) => ({
           ...task,
           assigned_to_email: task.assigned_user?.email,
           assigned_to_role: task.assigned_user?.role,
@@ -303,23 +302,27 @@ export const useTasks = () => {
 
     try {
       // Optimistic update - update local state immediately
-      const optimisticUpdates = {
-        status: newStatus,
-        ...(newColumn && { board_column: newColumn }),
-        updated_at: new Date().toISOString(), // Mark as optimistically updated
-      };
-      
-      setTasks(currentTasks => {
-        const updatedTasks = applyOptimisticUpdate(currentTasks, taskId, optimisticUpdates);
-        console.log('🔄 Optimistic update applied:', { 
-          taskId, 
-          newStatus, 
+      setTasks((currentTasks) => {
+        const updatedTasks = currentTasks.map((task) => {
+          if (task.id === taskId) {
+            return {
+              ...task,
+              status: newStatus,
+              ...(newColumn && { board_column: newColumn }),
+              updated_at: new Date().toISOString(),
+            };
+          }
+          return task;
+        });
+        console.log('🔄 Optimistic update applied:', {
+          taskId,
+          newStatus,
           newColumn,
           from: `${originalColumn}/${originalStatus}`,
           to: `${newColumn}/${newStatus}`,
-          taskAfterUpdate: updatedTasks.find(t => t.id === taskId)
+          taskAfterUpdate: updatedTasks.find((t) => t.id === taskId),
         });
-        return [...updatedTasks]; // Ensure new array reference
+        return updatedTasks;
       });
 
       // Prepare database updates
@@ -329,7 +332,7 @@ export const useTasks = () => {
       }
 
       console.log('💾 Database update starting', { taskId, updates });
-      
+
       // Update database
       const { error, data } = await supabase
         .from('tasks')
@@ -342,17 +345,17 @@ export const useTasks = () => {
         console.error('❌ Database update failed:', error);
         throw error;
       }
-      
+
       if (!data) {
         console.error('❌ Database update returned no data');
         throw new Error('Database update failed - no data returned');
       }
-      
-      console.log('✅ Database update successful', { 
-        taskId, 
+
+      console.log('✅ Database update successful', {
+        taskId,
         updatedTask: data,
         confirmedStatus: data.status,
-        confirmedColumn: data.board_column 
+        confirmedColumn: data.board_column,
       });
 
       // Log activity if client is associated and Clients module is available
@@ -373,68 +376,81 @@ export const useTasks = () => {
       }
 
       // Confirm the optimistic update with database response
-      setTasks(currentTasks => {
-        const currentTask = currentTasks.find(t => t.id === taskId);
+      setTasks((currentTasks) => {
+        const currentTask = currentTasks.find((t) => t.id === taskId);
         if (!currentTask) {
-          console.warn('⚠️ Task not found in current state during confirmation');
+          console.warn(
+            '⚠️ Task not found in current state during confirmation'
+          );
           return currentTasks;
         }
 
         // Ensure the database response matches our optimistic update
         const confirmedStatus = data.status || newStatus;
-        const confirmedColumn = data.board_column || newColumn || currentTask.board_column;
-        
+        const confirmedColumn =
+          data.board_column || newColumn || currentTask.board_column;
+
         // Only update if there's actually a difference
-        if (currentTask.status === confirmedStatus && 
-            currentTask.board_column === confirmedColumn &&
-            currentTask.updated_at >= (data.updated_at || new Date().toISOString())) {
-          console.log('✅ Optimistic state already matches database, no update needed');
+        if (
+          currentTask.status === confirmedStatus &&
+          currentTask.board_column === confirmedColumn &&
+          currentTask.updated_at >=
+            (data.updated_at || new Date().toISOString())
+        ) {
+          console.log(
+            '✅ Optimistic state already matches database, no update needed'
+          );
           return currentTasks;
         }
 
-        const updatedTasks = currentTasks.map(t => {
+        const updatedTasks = currentTasks.map((t) => {
           if (t.id === taskId) {
             return {
               ...t,
               status: confirmedStatus,
               board_column: confirmedColumn,
-              updated_at: data.updated_at || new Date().toISOString()
+              updated_at: data.updated_at || new Date().toISOString(),
             };
           }
           return t;
         });
-        
+
         console.log('✅ State confirmed with database response:', {
           taskId,
           confirmedStatus,
           confirmedColumn,
-          wasOptimistic: currentTask.status !== confirmedStatus || currentTask.board_column !== confirmedColumn,
-          taskAfterConfirmation: updatedTasks.find(t => t.id === taskId)
+          wasOptimistic:
+            currentTask.status !== confirmedStatus ||
+            currentTask.board_column !== confirmedColumn,
+          taskAfterConfirmation: updatedTasks.find((t) => t.id === taskId),
         });
-        
+
         return updatedTasks;
       });
 
       toast.success('Task status updated');
       console.log('🎉 Task update complete - state synchronized with database');
-      
     } catch (err: unknown) {
       console.error('❌ Database update failed, rolling back', err);
-      
+
       // Rollback optimistic update on error
-      setTasks(currentTasks => {
+      setTasks((currentTasks) => {
         const rollbackUpdates = {
           status: originalStatus,
           board_column: originalColumn,
           updated_at: taskToUpdate.updated_at, // Restore original timestamp
         };
-        const rolledBackTasks = applyOptimisticUpdate(currentTasks, taskId, rollbackUpdates);
-        console.log('🔄 Rolling back optimistic update', { 
-          taskId, 
-          originalStatus, 
+        const rolledBackTasks = applyOptimisticUpdate(
+          currentTasks,
+          taskId,
+          rollbackUpdates
+        );
+        console.log('🔄 Rolling back optimistic update', {
+          taskId,
+          originalStatus,
           originalColumn,
           error: err instanceof Error ? err.message : 'Unknown error',
-          taskAfterRollback: rolledBackTasks.find(t => t.id === taskId)
+          taskAfterRollback: rolledBackTasks.find((t) => t.id === taskId),
         });
         return [...rolledBackTasks]; // Ensure new array reference
       });
@@ -448,18 +464,26 @@ export const useTasks = () => {
   };
 
   // Assign task (supports both assign and unassign)
-  const assignTask = async (taskId: string, userId: string | null): Promise<void> => {
+  const assignTask = async (
+    taskId: string,
+    userId: string | null
+  ): Promise<void> => {
     // Store original task state for rollback
     const originalTask = tasks.find((t) => t.id === taskId);
     if (!originalTask) throw new Error('Task not found');
-    
+
     const originalAssignedTo = originalTask.assigned_to;
     const originalAssignedToEmail = originalTask.assigned_to_email;
     const originalAssignedToRole = originalTask.assigned_to_role;
 
     try {
-      console.log('🔄 assignTask called:', { taskId, userId, currentUser: user?.id, userRole: user?.role });
-      
+      console.log('🔄 assignTask called:', {
+        taskId,
+        userId,
+        currentUser: user?.id,
+        userRole: user?.role,
+      });
+
       // Check authentication
       if (!user?.id || !user?.company_id) {
         throw new Error('User not authenticated or missing company');
@@ -490,23 +514,36 @@ export const useTasks = () => {
       }
 
       // Apply optimistic update immediately
-      const optimisticUpdates = userId && assigneeUser
-        ? { 
-            assigned_to: userId, 
-            assigned_to_email: assigneeUser.email,
-            assigned_to_role: assigneeUser.role
+      setTasks((currentTasks) => {
+        const updatedTasks = currentTasks.map((task) => {
+          if (task.id === taskId) {
+            if (userId && assigneeUser) {
+              return {
+                ...task,
+                assigned_to: userId,
+                assigned_to_email: assigneeUser.email,
+                assigned_to_role: assigneeUser.role,
+              };
+            } else {
+              return {
+                ...task,
+                assigned_to: null,
+                assigned_to_email: null,
+                assigned_to_role: null,
+              };
+            }
           }
-        : { 
-            assigned_to: null, 
-            assigned_to_email: null,
-            assigned_to_role: null
-          };
+          return task;
+        });
+        console.log('🔄 Optimistic assignment update:', {
+          taskId,
+          userId,
+          assigneeEmail: assigneeUser?.email,
+        });
+        return updatedTasks;
+      });
 
-      const updatedTasks = applyOptimisticUpdate(tasks, taskId, optimisticUpdates);
-      console.log('🔄 Optimistic assignment update:', { taskId, userId, assigneeEmail: assigneeUser?.email });
-      setTasks([...updatedTasks]); // Ensure new array reference
-
-      const updateData = userId 
+      const updateData = userId
         ? { assigned_to: userId, assigned_by: user.id }
         : { assigned_to: null, assigned_by: user.id };
 
@@ -516,8 +553,7 @@ export const useTasks = () => {
         .from('tasks')
         .update(updateData)
         .eq('id', taskId)
-        .eq('company_id', user.company_id)
-        .select(`
+        .eq('company_id', user.company_id).select(`
           *,
           assigned_user:users!assigned_to(id, email, role)
         `);
@@ -530,7 +566,7 @@ export const useTasks = () => {
           hint: error.hint,
           taskId,
           userId,
-          userCompanyId: user.company_id
+          userCompanyId: user.company_id,
         });
         throw error;
       }
@@ -544,9 +580,9 @@ export const useTasks = () => {
           assigned_to: updatedTask.assigned_to,
           assigned_to_email: updatedTask.assigned_user?.email,
           assigned_to_role: updatedTask.assigned_user?.role,
-          assigned_by: updatedTask.assigned_by
+          assigned_by: updatedTask.assigned_by,
         };
-        
+
         const finalTasks = applyOptimisticUpdate(tasks, taskId, finalUpdates);
         setTasks([...finalTasks]);
       }
@@ -568,23 +604,34 @@ export const useTasks = () => {
         }
       }
 
-      toast.success(userId ? 'Task assigned successfully' : 'Task unassigned successfully');
+      toast.success(
+        userId ? 'Task assigned successfully' : 'Task unassigned successfully'
+      );
     } catch (err: unknown) {
       console.error('❌ Assignment failed, rolling back:', err);
-      
+
       // Rollback optimistic update on error
-      setTasks(currentTasks => {
+      setTasks((currentTasks) => {
         const rollbackUpdates = {
           assigned_to: originalAssignedTo,
           assigned_to_email: originalAssignedToEmail,
           assigned_to_role: originalAssignedToRole,
         };
-        const rolledBackTasks = applyOptimisticUpdate(currentTasks, taskId, rollbackUpdates);
-        console.log('🔄 Rolling back assignment update', { taskId, originalAssignedTo, originalAssignedToEmail });
+        const rolledBackTasks = applyOptimisticUpdate(
+          currentTasks,
+          taskId,
+          rollbackUpdates
+        );
+        console.log('🔄 Rolling back assignment update', {
+          taskId,
+          originalAssignedTo,
+          originalAssignedToEmail,
+        });
         return [...rolledBackTasks]; // Ensure new array reference
       });
-      
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+
+      const errorMessage =
+        err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       toast.error(`Error assigning task: ${errorMessage}`);
       throw err;
@@ -605,7 +652,9 @@ export const useTasks = () => {
           .from('tasks')
           .select('*')
           .eq('company_id', companyId)
-          .or(`title.ilike.%${sanitizedTerm}%,description.ilike.%${sanitizedTerm}%`)
+          .or(
+            `title.ilike.%${sanitizedTerm}%,description.ilike.%${sanitizedTerm}%`
+          )
           .order('due_date', { ascending: true, nullsFirst: false })
           .limit(50); // Limit for performance
 
@@ -650,9 +699,9 @@ export const useTasks = () => {
           }
           throw new Error(`Failed to fetch task: ${error.message}`);
         }
-        
+
         if (!data) return null;
-        
+
         // Process assignment data for compatibility
         return {
           ...data,
@@ -675,31 +724,28 @@ export const useTasks = () => {
   /**
    * Get comprehensive task statistics using database function
    */
-  const getTaskStats = useCallback(
-    async (): Promise<TaskStats | null> => {
-      if (!companyId) return null;
+  const getTaskStats = useCallback(async (): Promise<TaskStats | null> => {
+    if (!companyId) return null;
 
-      try {
-        const startTime = Date.now();
-        const { data, error } = await supabase.rpc('get_company_task_stats', {
-          p_company_id: companyId,
-        });
+    try {
+      const startTime = Date.now();
+      const { data, error } = await supabase.rpc('get_company_task_stats', {
+        p_company_id: companyId,
+      });
 
-        if (error) throw error;
+      if (error) throw error;
 
-        const duration = Date.now() - startTime;
-        if (duration > PERFORMANCE_THRESHOLDS.SLOW_QUERY_MS) {
-          console.warn(`Slow task stats query: ${duration}ms`);
-        }
-
-        return data;
-      } catch (err: unknown) {
-        console.error('Error fetching task stats:', err);
-        return null;
+      const duration = Date.now() - startTime;
+      if (duration > PERFORMANCE_THRESHOLDS.SLOW_QUERY_MS) {
+        console.warn(`Slow task stats query: ${duration}ms`);
       }
-    },
-    [companyId]
-  );
+
+      return data;
+    } catch (err: unknown) {
+      console.error('Error fetching task stats:', err);
+      return null;
+    }
+  }, [companyId]);
 
   /**
    * Advanced task search using database function
@@ -746,9 +792,12 @@ export const useTasks = () => {
       if (!companyId) return null;
 
       try {
-        const { data, error } = await supabase.rpc('create_recurring_task_instance', {
-          p_parent_task_id: parentTaskId,
-        });
+        const { data, error } = await supabase.rpc(
+          'create_recurring_task_instance',
+          {
+            p_parent_task_id: parentTaskId,
+          }
+        );
 
         if (error) throw error;
 
@@ -757,7 +806,8 @@ export const useTasks = () => {
 
         return data; // Returns new task ID
       } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+        const errorMessage =
+          err instanceof Error ? err.message : 'Unknown error occurred';
         console.error('Error creating recurring task instance:', err);
         toast.error(`Error creating recurring task: ${errorMessage}`);
         return null;
@@ -799,35 +849,32 @@ export const useTasks = () => {
   /**
    * Get tasks from dashboard view
    */
-  const getDashboardTasks = useCallback(
-    async (): Promise<Task[]> => {
-      if (!companyId) return [];
+  const getDashboardTasks = useCallback(async (): Promise<Task[]> => {
+    if (!companyId) return [];
 
-      try {
-        const startTime = Date.now();
-        const { data, error } = await supabase
-          .from('task_dashboard')
-          .select('*')
-          .eq('company_id', companyId)
-          .order('urgency_status')
-          .order('due_date', { ascending: true })
-          .limit(100);
+    try {
+      const startTime = Date.now();
+      const { data, error } = await supabase
+        .from('task_dashboard')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('urgency_status')
+        .order('due_date', { ascending: true })
+        .limit(100);
 
-        if (error) throw error;
+      if (error) throw error;
 
-        const duration = Date.now() - startTime;
-        if (duration > PERFORMANCE_THRESHOLDS.SLOW_QUERY_MS) {
-          console.warn(`Slow dashboard tasks query: ${duration}ms`);
-        }
-
-        return data || [];
-      } catch (err: unknown) {
-        console.error('Error fetching dashboard tasks:', err);
-        return [];
+      const duration = Date.now() - startTime;
+      if (duration > PERFORMANCE_THRESHOLDS.SLOW_QUERY_MS) {
+        console.warn(`Slow dashboard tasks query: ${duration}ms`);
       }
-    },
-    [companyId]
-  );
+
+      return data || [];
+    } catch (err: unknown) {
+      console.error('Error fetching dashboard tasks:', err);
+      return [];
+    }
+  }, [companyId]);
 
   /**
    * Bulk update task statuses
@@ -840,9 +887,11 @@ export const useTasks = () => {
         const startTime = Date.now();
         const { error } = await supabase
           .from('tasks')
-          .update({ 
+          .update({
             status: newStatus,
-            ...(newStatus === 'completed' ? { completed_at: new Date().toISOString() } : {})
+            ...(newStatus === 'completed'
+              ? { completed_at: new Date().toISOString() }
+              : {}),
           })
           .in('id', taskIds)
           .eq('company_id', companyId);
@@ -859,7 +908,8 @@ export const useTasks = () => {
 
         return true;
       } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+        const errorMessage =
+          err instanceof Error ? err.message : 'Unknown error occurred';
         console.error('Error bulk updating tasks:', err);
         toast.error(`Error updating tasks: ${errorMessage}`);
         return false;
@@ -871,16 +921,17 @@ export const useTasks = () => {
   // Memoized computed values for performance
   const tasksCount = useMemo(() => tasks.length, [tasks.length]);
   const completedTasksCount = useMemo(
-    () => tasks.filter(t => t.status === 'completed').length,
+    () => tasks.filter((t) => t.status === 'completed').length,
     [tasks]
   );
   const overdueTasksCount = useMemo(() => {
     const now = new Date();
-    return tasks.filter(t => 
-      t.status !== 'completed' && 
-      t.status !== 'cancelled' &&
-      t.due_date && 
-      new Date(t.due_date) < now
+    return tasks.filter(
+      (t) =>
+        t.status !== 'completed' &&
+        t.status !== 'cancelled' &&
+        t.due_date &&
+        new Date(t.due_date) < now
     ).length;
   }, [tasks]);
 
@@ -889,7 +940,7 @@ export const useTasks = () => {
     tasks,
     loading,
     error,
-    
+
     // Basic CRUD operations
     fetchTasks,
     createTask,
@@ -897,11 +948,11 @@ export const useTasks = () => {
     deleteTask,
     updateTaskStatus,
     assignTask,
-    
+
     // Search and retrieval
     searchTasks,
     getTaskById,
-    
+
     // Enhanced database functions
     getTaskStats,
     searchTasksAdvanced,
@@ -909,7 +960,7 @@ export const useTasks = () => {
     getTasksWithDetails,
     getDashboardTasks,
     bulkUpdateTaskStatus,
-    
+
     // Computed values
     tasksCount,
     completedTasksCount,

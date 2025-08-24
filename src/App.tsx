@@ -23,6 +23,12 @@ import {
   EditClientPage,
   ClientViewPage,
 } from '@/modules/clients';
+import { 
+  TasksPage,
+  AddTaskPage,
+  EditTaskPage,
+  TaskDetailPage,
+} from '@/modules/tasks';
 import { AccessDeniedPage } from '@/pages/AccessDeniedPage';
 
 // Styles
@@ -75,6 +81,11 @@ function App() {
             <Route path="clients/add" element={<AddClientPage />} />
             <Route path="clients/:id" element={<ClientViewPage />} />
             <Route path="clients/:id/edit" element={<EditClientPage />} />
+
+            <Route path="tasks" element={<TasksPage />} />
+            <Route path="tasks/new" element={<AddTaskPage />} />
+            <Route path="tasks/:id" element={<TaskDetailPage />} />
+            <Route path="tasks/:id/edit" element={<EditTaskPage />} />
 
             <Route path="modules" element={<ModulesPage />} />
             <Route

@@ -24,6 +24,7 @@ export { AddClientPage } from './pages/AddClientPage';
 export { EditClientPage } from './pages/EditClientPage';
 export { ClientViewPage } from './pages/ClientViewPage';
 export { ClientCard } from './components/ClientCard';
+export { ClientCardWithTasks } from './components/ClientCardWithTasks';
 export { ClientHistoryTimeline } from './components/ClientHistoryTimeline';
 
 // Hook exports
